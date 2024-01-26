@@ -8,6 +8,8 @@ public class LibEmailServiceApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(LibEmailServiceApplication.class, args);
+
+
     }
 
 }

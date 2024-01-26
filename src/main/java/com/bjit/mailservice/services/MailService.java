@@ -1,6 +1,7 @@
 package com.bjit.mailservice.services;
 
 import com.bjit.mailservice.models.MailContent;
+import jakarta.mail.MessagingException;
 
 /**
  * Interface for sending email messages.
@@ -19,6 +20,6 @@ public interface MailService {
      * @return A message indicating the result of the email sending operation.
      *         It could be a success message or an error message.
      */
-    String sendMail(MailContent mailContent);
+    String sendMail(MailContent mailContent) throws MessagingException;
 }
 

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -22,5 +23,5 @@ public class MailContent {
     private ArrayList<String> bcc;
     private String subject;
     private String body;
-    private ArrayList<String> attachments;
+    private ArrayList<File> attachments;
 }
