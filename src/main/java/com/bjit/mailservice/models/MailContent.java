@@ -1,9 +1,8 @@
 package com.bjit.mailservice.models;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -11,10 +10,7 @@ import java.util.ArrayList;
  *
  * @author Mallika Dey
  */
-
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class MailContent {
     private String from;
     private ArrayList<String> to;
@@ -22,5 +18,5 @@ public class MailContent {
     private ArrayList<String> bcc;
     private String subject;
     private String body;
-    private ArrayList<String> attachments;
+    private ArrayList<File> attachments;
 }
