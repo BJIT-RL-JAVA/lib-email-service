@@ -13,6 +13,7 @@ import java.util.Properties;
 
 import com.amazonaws.services.simpleemail.model.RawMessage;
 import com.amazonaws.services.simpleemail.model.SendRawEmailRequest;
+import com.bjit.mailservice.services.MailValidation;
 import jakarta.activation.DataHandler;
 import jakarta.activation.FileDataSource;
 import jakarta.mail.Message;
@@ -21,6 +22,7 @@ import jakarta.mail.Multipart;
 import jakarta.mail.Session;
 import jakarta.mail.internet.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Implementation of the MailService interface for sending emails using AWS SES (Simple Email Service).
@@ -28,7 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Mallika Dey
  */
-public class AwsMailService implements MailService {
+@Service
+public class AwsMailService implements MailService, MailValidation {
     @Autowired
     private AmazonSimpleEmailService client;
 
@@ -63,7 +66,7 @@ public class AwsMailService implements MailService {
 
         for (File file : mailContent.getAttachments()) {
             MimeBodyPart filePart = new MimeBodyPart();
-            //checkFileCompatibility(file);
+            checkFileCompatibility(file);
             filePart.setDataHandler(new DataHandler(new FileDataSource(file)));
             filePart.setFileName(file.getName());
             multipart.addBodyPart(filePart);
@@ -94,7 +97,6 @@ public class AwsMailService implements MailService {
         }
         return "mail sent successfully";
     }
-
 
     private MimeMessage generateMimeMessage(MailContent mailContent,
                                             Session session) throws MessagingException {
