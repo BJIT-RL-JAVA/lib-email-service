@@ -23,6 +23,7 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'com.sendgrid:sendgrid-java:4.10.1'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	implementation 'io.awspring.cloud:spring-cloud-aws-dependencies:3.1.0'
