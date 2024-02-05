@@ -77,11 +77,7 @@ public class SmtpMailService implements MailService {
     private MimeMessage createMimeMessage(Session session, MailContent mailContent)
             throws MessagingException {
         MimeMessage message = new MimeMessage(session);
-        message.setRecipients(Message.RecipientType.TO,
-                createInternetAddresses(mailContent.getTo()));
-        message.setFrom(new InternetAddress(mailContent.getFrom()));
-        message.setSubject(mailContent.getSubject());
-
+        setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
         Multipart multipart = new MimeMultipart();
         addTextPart(multipart, mailContent.getBody());
         try {
@@ -89,9 +85,24 @@ public class SmtpMailService implements MailService {
         } catch (EmailException e) {
             throw new RuntimeException(e);
         }
-
         message.setContent(multipart);
 
+        return message;
+    }
+    private MimeMessage setEmailHeader(MimeMessage message, List<String> to,
+                                       List<String> cc,List<String> bcc, String subject){
+        try {
+            message.setRecipients(Message.RecipientType.TO,
+                    createInternetAddresses(to));
+            message.setRecipients(Message.RecipientType.CC,
+                    createInternetAddresses(cc));
+            message.setRecipients(Message.RecipientType.BCC,
+                    createInternetAddresses(bcc));
+
+            message.setSubject(subject);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
         return message;
     }
 
