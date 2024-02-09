@@ -77,7 +77,7 @@ public class SendGridMailService implements MailService, MailValidation {
             System.out.println(response.getBody());
             System.out.println(response.getHeaders());
         } catch (IOException ex) {
-            logger.error("IO occured in request ", ex);
+            logger.error("IO exception occur in request ", ex);
             throw new MessagingException("Failed to send mail ", ex);
         }
         return "mail sent successfully";
