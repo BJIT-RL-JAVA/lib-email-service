@@ -36,10 +36,10 @@ public class SmtpMailService implements MailService {
      * @param mailContent The content of the email to be sent.
      * @return A message indicating the result of the email sending operation.
      *         It could be a success message or an error message.
-     * @throws EmailException If an error occurs during the email sending process.
+     * @throws MessagingException If an error occurs during the email sending process.
      */
     @Override
-    public String sendMail(MailContent mailContent) throws EmailException {
+    public String sendMail(MailContent mailContent) throws MessagingException {
         try {
 
             Session session = createSmtpSession();
@@ -48,7 +48,7 @@ public class SmtpMailService implements MailService {
             return "Mail has been sent successfully.";
         } catch (MessagingException e) {
             log.error("Error sending email", e);
-            throw new EmailException("Error sending email", e);
+            throw e;
         }
     }
     private Session createSmtpSession() {
