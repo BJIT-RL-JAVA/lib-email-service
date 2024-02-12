@@ -1,6 +1,6 @@
 /**
  * SmtpMailService is an implementation of the MailService interface that sends emails using the SMTP protocol.
- *  It provides methods for sending emails with text content and attachments.
+ * It provides methods for sending emails with text content and attachments.
  *
  * @author Khalid|| BJIT-R&D
  * @since: 1/26/2024
@@ -14,6 +14,7 @@ package com.bjit.mailservice.services.impl;
 import com.bjit.mailservice.exception.EmailException;
 import com.bjit.mailservice.models.MailContent;
 import com.bjit.mailservice.services.MailService;
+import com.bjit.mailservice.services.MailValidation;
 import jakarta.activation.DataHandler;
 import jakarta.activation.FileDataSource;
 import jakarta.mail.*;
@@ -26,10 +27,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-public class SmtpMailService implements MailService {
+public class SmtpMailService implements MailService, MailValidation {
 
     private static final Logger log = LoggerFactory.getLogger(SmtpMailService.class);
     private static final int MAX_FILE_SIZE_MB = 5;
+
     /**
      * Sends an email with the specified mail content.
      *
@@ -51,6 +53,7 @@ public class SmtpMailService implements MailService {
             throw e;
         }
     }
+
     private Session createSmtpSession() {
         Properties properties = new Properties();
         properties.put("mail.smtp.auth", true);
@@ -66,6 +69,7 @@ public class SmtpMailService implements MailService {
             }
         });
     }
+
     /**
      * Creates a MimeMessage for the specified mail content.
      *
@@ -89,8 +93,9 @@ public class SmtpMailService implements MailService {
 
         return message;
     }
+
     private MimeMessage setEmailHeader(MimeMessage message, List<String> to,
-                                       List<String> cc,List<String> bcc, String subject){
+                                       List<String> cc, List<String> bcc, String subject) {
         try {
             message.setRecipients(Message.RecipientType.TO,
                     createInternetAddresses(to));
@@ -114,6 +119,7 @@ public class SmtpMailService implements MailService {
         }
         return internetAddresses;
     }
+
     /**
      * Adds a text part to the specified multipart content.
      *
@@ -127,6 +133,7 @@ public class SmtpMailService implements MailService {
         textPart.setText(body);
         multipart.addBodyPart(textPart);
     }
+
     /**
      * Validates the size and type of the given file.
      *
@@ -136,7 +143,7 @@ public class SmtpMailService implements MailService {
     private void addAttachmentParts(Multipart multipart, List<File> attachments) throws EmailException {
         try {
             for (File file : attachments) {
-                validateFile(file);
+                checkFileCompatibility(file);
 
                 MimeBodyPart filePart = new MimeBodyPart();
                 filePart.setDataHandler(new DataHandler(new FileDataSource(file)));
@@ -147,31 +154,37 @@ public class SmtpMailService implements MailService {
             throw new RuntimeException(e);
         }
     }
-    /**
-     * Validates the size and type of the given file.
-     *
-     * @param file The file to be validated.
-     * @throws EmailException If the file fails size or type validation.
-     */
-    private void validateFile(File file) throws EmailException {
-        if (file.length() > MAX_FILE_SIZE_MB * 1024 * 1024) {
-            throw new EmailException("File size exceeds the limit of " + MAX_FILE_SIZE_MB + "MB: "
-                    + file.getName() + " Length of " + file.length() / (1024 * 1024) + "MB");
-        }
 
-        if (!file.exists()) {
-            throw new EmailException("File does not exist: " + file.getAbsolutePath());
-        }
+//    /**
+//     * Validates the size and type of the given file.
+//     *
+//     * @param file The file to be validated.
+//     * @throws EmailException If the file fails size or type validation.
+//     */
+//    private void validateFile(File file) throws EmailException {
+//        if (file.length() > MAX_FILE_SIZE_MB * 1024 * 1024) {
+//            throw new EmailException("File size exceeds the limit of " + MAX_FILE_SIZE_MB + "MB: "
+//                    + file.getName() + " Length of " + file.length() / (1024 * 1024) + "MB");
+//        }
+//
+//        if (!file.exists()) {
+//            throw new EmailException("File does not exist: " + file.getAbsolutePath());
+//        }
+//
+//        String fileName = file.getName();
+//        String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+//
+//        List<String> blockedFileTypes = Arrays.asList(
+//                "ade", "adp", "apk", "appx", "appxbundle", "bat", "cab", "chm", "cmd", "com", "cpl",
+//                // ... (add other blocked file types if needed)
+//                "xll");
+//        if (blockedFileTypes.contains(fileExtension)) {
+//            throw new EmailException("Unsupported file type: " + fileExtension + " - " + fileName);
+//        }
+//    }
 
-        String fileName = file.getName();
-        String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
-
-        List<String> blockedFileTypes = Arrays.asList(
-                "ade", "adp", "apk", "appx", "appxbundle", "bat", "cab", "chm", "cmd", "com", "cpl",
-                // ... (add other blocked file types if needed)
-                "xll");
-        if (blockedFileTypes.contains(fileExtension)) {
-            throw new EmailException("Unsupported file type: " + fileExtension + " - " + fileName);
-        }
+    @Override
+    public void checkFileCompatibility(File file) {
+        MailValidation.super.checkFileCompatibility(file);
     }
 }
