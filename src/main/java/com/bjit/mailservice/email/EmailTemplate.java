@@ -1,5 +1,6 @@
 package com.bjit.mailservice.email;
 
+import com.bjit.mailservice.exception.EmailException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,7 +23,7 @@ public class EmailTemplate {
             return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
         } catch (IOException ex) {
             LOGGER.error(String.format("%s%s", "NOT_FOUND", ex));
-            throw new NotFoundException(ErrorMessages.NOT_FOUND);
+            throw new EmailException("NOT_FOUND");
         }
     }
 }
