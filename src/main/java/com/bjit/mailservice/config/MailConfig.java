@@ -4,12 +4,12 @@ import com.bjit.mailservice.services.MailSender;
 import com.bjit.mailservice.services.MailServiceFactory;
 import com.bjit.mailservice.services.impl.AWSFactory;
 import com.bjit.mailservice.services.impl.SendGridFactory;
+import com.bjit.mailservice.services.impl.SmtpFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- *
  * @author Mallika Dey
  */
 @Configuration
@@ -39,6 +39,8 @@ public class MailConfig {
             return new SendGridFactory(sendGridApiKey);
         else if (mailServiceType.equalsIgnoreCase("aws"))
             return new AWSFactory(accessKey, secretKey, region);
+        else if (mailServiceType.equalsIgnoreCase("smtp"))
+            return new SmtpFactory();
 
         throw new IllegalArgumentException("Invalid mail service type: " + mailServiceType);
     }

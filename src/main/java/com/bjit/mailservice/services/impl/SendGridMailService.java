@@ -26,7 +26,6 @@ import java.util.Base64;
 /**
  * @author Mallika Dey
  */
-//@Service
 public class SendGridMailService implements MailService, MailValidation {
     private static final Logger logger = LoggerFactory.getLogger(SendGridMailService.class);
 

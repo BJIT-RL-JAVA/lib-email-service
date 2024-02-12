@@ -23,6 +23,8 @@ public class MailSender {
         MailContent mailContent = new MailContent();
         mailContent.setTo(new ArrayList<>(Arrays.asList("mallika.dey@bjitgroup.com", "mallikaju307@gmail.com")));
         mailContent.setFrom("khalid.hasan@bjitgroup.com");
+        mailContent.setCc(new ArrayList<>(Arrays.asList("khalidhasan374@gmail.com", "connectkhalid404@gmail.com")));
+        mailContent.setBcc(new ArrayList(Arrays.asList("khalidhasankibria@gmail.com", "connectkhalid404@gmail.com")));
         mailContent.setSubject("Testing mail");
         mailContent.setBody("Message body");
         mailContent.setAttachments(

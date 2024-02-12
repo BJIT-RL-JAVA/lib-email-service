@@ -30,7 +30,6 @@ import org.springframework.stereotype.Service;
  *
  * @author Mallika Dey
  */
-//@Service
 public class AwsMailService implements MailService, MailValidation {
     private final AmazonSimpleEmailService client;
 
