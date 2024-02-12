@@ -26,12 +26,15 @@ import java.util.Base64;
 /**
  * @author Mallika Dey
  */
-@Service
+//@Service
 public class SendGridMailService implements MailService, MailValidation {
     private static final Logger logger = LoggerFactory.getLogger(SendGridMailService.class);
 
-    @Autowired
     private SendGrid sendGrid;
+
+    public SendGridMailService(SendGrid sendGrid) {
+        this.sendGrid = sendGrid;
+    }
 
     /**
      * Sends an email with the specified mail content.

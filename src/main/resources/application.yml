@@ -1,7 +1,7 @@
 cloud:
   aws:
     region:
-      static:
+      static: ap-southeast-1
       auto: false
     stack:
       auto: false
@@ -12,3 +12,6 @@ cloud:
 sendgrid:
   api:
     key:
+mail:
+  service:
+    type: sendgrid

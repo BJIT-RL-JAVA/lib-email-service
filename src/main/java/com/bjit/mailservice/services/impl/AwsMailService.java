@@ -30,10 +30,14 @@ import org.springframework.stereotype.Service;
  *
  * @author Mallika Dey
  */
-@Service
+//@Service
 public class AwsMailService implements MailService, MailValidation {
+    private final AmazonSimpleEmailService client;
+
     @Autowired
-    private AmazonSimpleEmailService client;
+    public AwsMailService(AmazonSimpleEmailService client) {
+        this.client = client;
+    }
 
     @Override
     public String sendMail(MailContent mailContent) throws MessagingException {

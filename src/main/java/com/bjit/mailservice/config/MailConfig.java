@@ -1,16 +1,17 @@
 package com.bjit.mailservice.config;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
-import com.sendgrid.SendGrid;
-import io.awspring.cloud.ses.SimpleEmailServiceMailSender;
+import com.bjit.mailservice.services.MailSender;
+import com.bjit.mailservice.services.MailServiceFactory;
+import com.bjit.mailservice.services.impl.AWSFactory;
+import com.bjit.mailservice.services.impl.SendGridFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.mail.MailSender;
 
+/**
+ *
+ * @author Mallika Dey
+ */
 @Configuration
 public class MailConfig {
     @Value("${cloud.aws.credentials.accessKey}")
@@ -25,28 +26,31 @@ public class MailConfig {
     @Value("${sendgrid.api.key}")
     private String sendGridApiKey;
 
-    public MailConfig(@Value("${sendgrid.api.key}") String sendGridApiKey) {
-        this.sendGridApiKey = sendGridApiKey;
+    /**
+     * Bean definition for creating a MailServiceFactory based on the configured mail service type.
+     *
+     * @param mailServiceType The type of mail service to use (e.g., "sendgrid" or "aws")
+     * @return MailServiceFactory instance for the specified mail service type
+     * @throws IllegalArgumentException if an invalid mail service type is provided
+     */
+    @Bean
+    public MailServiceFactory mailServiceFactory(@Value("${mail.service.type}") String mailServiceType) {
+        if (mailServiceType.equalsIgnoreCase("sendgrid"))
+            return new SendGridFactory(sendGridApiKey);
+        else if (mailServiceType.equalsIgnoreCase("aws"))
+            return new AWSFactory(accessKey, secretKey, region);
+
+        throw new IllegalArgumentException("Invalid mail service type: " + mailServiceType);
     }
 
+    /**
+     * Bean definition for creating a MailSender instance using the configured MailServiceFactory.
+     *
+     * @param mailServiceFactory MailServiceFactory instance for creating MailService
+     * @return MailSender instance
+     */
     @Bean
-    public AmazonSimpleEmailService amazonSimpleEmailService() {
-        BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
-
-        return AmazonSimpleEmailServiceClientBuilder.standard()
-                .withRegion(region)
-                .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .build();
-    }
-
-    @Bean
-    public MailSender mailSender(
-            AmazonSimpleEmailService amazonSimpleEmailService) {
-        return new SimpleEmailServiceMailSender(amazonSimpleEmailService);
-    }
-
-    @Bean
-    public SendGrid sendGrid() {
-        return new SendGrid(sendGridApiKey);
+    public MailSender mailSender(MailServiceFactory mailServiceFactory) {
+        return new MailSender(mailServiceFactory);
     }
 }
