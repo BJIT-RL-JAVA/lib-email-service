@@ -5,9 +5,16 @@ import java.util.Arrays;
 import java.util.List;
 
 public interface MailValidation {
+
+    /**
+     * Checks the compatibility of a file based on its existence and file type.
+     *
+     * @param file The file to be checked for compatibility.
+     * @throws IllegalArgumentException if the file is null or if it has an unsupported file type.
+     */
     default void checkFileCompatibility(File file) {
         if (!file.exists()) {
-            throw new RuntimeException("File does not exist: " + file.getAbsolutePath());
+            throw new IllegalArgumentException("File does not exist: " + file.getAbsolutePath());
         }
         String fileName = file.getName();
         String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();

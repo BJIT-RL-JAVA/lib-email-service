@@ -23,6 +23,7 @@ import jakarta.mail.Session;
 import jakarta.mail.internet.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Implementation of the MailService interface for sending emails using AWS SES (Simple Email Service).
@@ -33,7 +34,6 @@ import org.springframework.stereotype.Service;
 public class AwsMailService implements MailService, MailValidation {
     private final AmazonSimpleEmailService client;
 
-    @Autowired
     public AwsMailService(AmazonSimpleEmailService client) {
         this.client = client;
     }
@@ -59,13 +59,14 @@ public class AwsMailService implements MailService, MailValidation {
 
         wrap.setContent(msg_body);
 
-        MimeMultipart msg = new MimeMultipart("mixed");
-
-        message.setContent(msg);
-        msg.addBodyPart(wrap);
+//        MimeMultipart msg = new MimeMultipart("mixed");
+//
+//        message.setContent(msg);
+//        msg.addBodyPart(wrap);
 
         Multipart multipart = new MimeMultipart();
-        multipart.addBodyPart(textPart);
+//        multipart.addBodyPart(textPart);
+        multipart.addBodyPart(wrap);
 
         for (File file : mailContent.getAttachments()) {
             MimeBodyPart filePart = new MimeBodyPart();
@@ -107,25 +108,32 @@ public class AwsMailService implements MailService, MailValidation {
 
         message.setSubject(mailContent.getSubject(), "UTF-8");
 
-        ArrayList<InternetAddress> addressTo = new ArrayList<InternetAddress>();
+
         ArrayList<InternetAddress> addressCc = new ArrayList<InternetAddress>();
         ArrayList<InternetAddress> addressBCc = new ArrayList<InternetAddress>();
 
-        for (String to : mailContent.getTo()) {
-            addressTo.add(new InternetAddress(to));
+        if (!ObjectUtils.isEmpty(mailContent.getTo())) {
+            setRecipients(message, Message.RecipientType.TO, mailContent.getTo());
         }
-        for (String to : mailContent.getCc()) {
-            addressCc.add(new InternetAddress(to));
+        if (!ObjectUtils.isEmpty(mailContent.getCc())) {
+            setRecipients(message, Message.RecipientType.CC, mailContent.getCc());
         }
-        for (String to : mailContent.getBcc()) {
-            addressBCc.add(new InternetAddress(to));
+        if (!ObjectUtils.isEmpty(mailContent.getBcc())) {
+            setRecipients(message, Message.RecipientType.BCC, mailContent.getBcc());
         }
 
         message.setFrom(new InternetAddress(mailContent.getFrom()));
-        message.setRecipients(Message.RecipientType.TO, addressTo.toArray(new InternetAddress[0]));
-        message.setRecipients(Message.RecipientType.CC, addressCc.toArray(new InternetAddress[0]));
-        message.setRecipients(Message.RecipientType.BCC, addressBCc.toArray(new InternetAddress[0]));
 
         return message;
+    }
+
+    private void setRecipients(MimeMessage message, Message.RecipientType type,
+                               ArrayList<String> addresses) throws MessagingException {
+
+        ArrayList<InternetAddress> addressTo = new ArrayList<InternetAddress>();
+        for (String address : addresses) {
+            addressTo.add(new InternetAddress(address));
+        }
+        message.setRecipients(type, addressTo.toArray(new InternetAddress[0]));
     }
 }

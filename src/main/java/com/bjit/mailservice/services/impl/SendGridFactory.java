@@ -6,6 +6,8 @@ import com.sendgrid.SendGrid;
 import org.springframework.context.annotation.Bean;
 
 /**
+ * Factory for creating SendGrid mail service instance
+ *
  * @author Mallika Dey
  */
 public class SendGridFactory implements MailServiceFactory {

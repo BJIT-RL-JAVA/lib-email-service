@@ -24,6 +24,9 @@ import java.nio.file.Files;
 import java.util.Base64;
 
 /**
+ * Implementation of the MailService interface for sending emails using SendGrid.
+ * This class handles the integration with SendGrid and provides the logic for sending email messages.
+ *
  * @author Mallika Dey
  */
 public class SendGridMailService implements MailService, MailValidation {
