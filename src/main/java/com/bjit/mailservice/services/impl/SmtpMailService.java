@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -154,34 +153,6 @@ public class SmtpMailService implements MailService, MailValidation {
             throw new RuntimeException(e);
         }
     }
-
-//    /**
-//     * Validates the size and type of the given file.
-//     *
-//     * @param file The file to be validated.
-//     * @throws EmailException If the file fails size or type validation.
-//     */
-//    private void validateFile(File file) throws EmailException {
-//        if (file.length() > MAX_FILE_SIZE_MB * 1024 * 1024) {
-//            throw new EmailException("File size exceeds the limit of " + MAX_FILE_SIZE_MB + "MB: "
-//                    + file.getName() + " Length of " + file.length() / (1024 * 1024) + "MB");
-//        }
-//
-//        if (!file.exists()) {
-//            throw new EmailException("File does not exist: " + file.getAbsolutePath());
-//        }
-//
-//        String fileName = file.getName();
-//        String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
-//
-//        List<String> blockedFileTypes = Arrays.asList(
-//                "ade", "adp", "apk", "appx", "appxbundle", "bat", "cab", "chm", "cmd", "com", "cpl",
-//                // ... (add other blocked file types if needed)
-//                "xll");
-//        if (blockedFileTypes.contains(fileExtension)) {
-//            throw new EmailException("Unsupported file type: " + fileExtension + " - " + fileName);
-//        }
-//    }
 
     @Override
     public void checkFileCompatibility(File file) {

@@ -25,7 +25,6 @@ import java.util.ArrayList;
 public class AttachmentSizeValidator implements ConstraintValidator<ValidAttachmentSize, ArrayList<File>> {
     @Override
     public void initialize(ValidAttachmentSize constraintAnnotation) {
-        //ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
     @Override
