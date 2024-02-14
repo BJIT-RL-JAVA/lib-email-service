@@ -37,7 +37,9 @@ public class LibEmailServiceApplication {
 
         try {
             MailContent mailContent = createMailContent(from, to, cc, bcc, subject, text, attachmentFiles);
-            gmailSender.sendMail(mailContent);
+            // Change templateName to the name of your HTML template file
+            String templateName = "welcome.html";
+            gmailSender.sendHtmlTemplateMail(mailContent, templateName);
             System.out.println("Email has been sent successfully.");
         } catch (MessagingException e) {
             System.out.println("Error sending email: " + e.getMessage());
