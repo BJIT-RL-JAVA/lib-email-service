@@ -23,13 +23,12 @@ public class LibEmailServiceApplication {
                 Arrays.asList("khalidhasan374@gmail.com", "connectkhalid404@gmail.com"));
         ArrayList<String> cc = new ArrayList<>(
                 Arrays.asList("khalidhasan374@gmail.com", "connectkhalid404@gmail.com"));
-        ArrayList<String> bcc = new ArrayList(
+        ArrayList<String> bcc = new ArrayList<>(
                 Arrays.asList("khalidhasankibria@gmail.com", "connectkhalid404@gmail.com"));
         String subject = "Sample email with having cc and bcc";
         String text = "sending massage with attachment to multiple recipient along with cc and bcc";
 
         ArrayList<File> attachmentFiles = new ArrayList<>(Arrays.asList(
-                new File("C:\\Users\\BJIT\\Downloads\\20230801_044533795_iOS.jpg"),
                 new File("C:\\Users\\BJIT\\Downloads\\flower.jpg"),
                 new File("C:\\Users\\BJIT\\Downloads\\download.jpeg"),
                 new File("C:\\Users\\BJIT\\Downloads\\20221223_153514060_iOS-1689994677260.png")
