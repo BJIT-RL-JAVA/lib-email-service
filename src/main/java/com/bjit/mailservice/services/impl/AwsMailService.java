@@ -59,23 +59,18 @@ public class AwsMailService implements MailService, MailValidation {
 
         wrap.setContent(msg_body);
 
-//        MimeMultipart msg = new MimeMultipart("mixed");
-//
-//        message.setContent(msg);
-//        msg.addBodyPart(wrap);
-
         Multipart multipart = new MimeMultipart();
-//        multipart.addBodyPart(textPart);
         multipart.addBodyPart(wrap);
 
-        for (File file : mailContent.getAttachments()) {
-            MimeBodyPart filePart = new MimeBodyPart();
-            checkFileCompatibility(file);
-            filePart.setDataHandler(new DataHandler(new FileDataSource(file)));
-            filePart.setFileName(file.getName());
-            multipart.addBodyPart(filePart);
+        if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
+            for (File file : mailContent.getAttachments()) {
+                MimeBodyPart filePart = new MimeBodyPart();
+                checkFileCompatibility(file);
+                filePart.setDataHandler(new DataHandler(new FileDataSource(file)));
+                filePart.setFileName(file.getName());
+                multipart.addBodyPart(filePart);
+            }
         }
-
         message.setContent(multipart);
         try {
             System.out.println("Attempting to send an email through Amazon SES "
@@ -107,7 +102,6 @@ public class AwsMailService implements MailService, MailValidation {
         MimeMessage message = new MimeMessage(session);
 
         message.setSubject(mailContent.getSubject(), "UTF-8");
-
 
         ArrayList<InternetAddress> addressCc = new ArrayList<InternetAddress>();
         ArrayList<InternetAddress> addressBCc = new ArrayList<InternetAddress>();

@@ -3,12 +3,10 @@ package com.bjit.mailservice.utils;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import jakarta.validation.ReportAsSingleViolation;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.groups.Default;
 
-import java.io.File;
 import java.lang.annotation.*;
 
 /**
