@@ -21,15 +21,18 @@ import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.StreamUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
 
 public class SmtpMailService implements MailService, MailValidation {
 
     private static final Logger log = LoggerFactory.getLogger(SmtpMailService.class);
-    private static final int MAX_FILE_SIZE_MB = 5;
 
     /**
      * Sends an email with the specified mail content.
@@ -157,5 +160,37 @@ public class SmtpMailService implements MailService, MailValidation {
     @Override
     public void checkFileCompatibility(File file) {
         MailValidation.super.checkFileCompatibility(file);
+    }
+    @Override
+    public String sendHtmlTemplateMail(MailContent mailContent, String templateName) throws MessagingException {
+        try {
+            Session session = createSmtpSession();
+            MimeMessage message = createTemplateMimeMessage(session, mailContent, templateName);
+            Transport.send(message);
+            return "HTML template mail has been sent successfully.";
+        } catch (MessagingException e) {
+            log.error("Error sending HTML template email", e);
+            throw e;
+        }
+    }
+    private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent, String templateName)
+            throws MessagingException {
+        MimeMessage message = new MimeMessage(session);
+        setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
+        String htmlContent = loadHtmlTemplate(templateName);
+        message.setContent(htmlContent, "text/html");
+        return message;
+    }
+
+    private String loadHtmlTemplate(String templateName) {
+        try {
+            // Load HTML content from the template file in the resources/templates directory
+            ClassPathResource resource = new ClassPathResource("templates/" + templateName);
+            byte[] templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
+            return new String(templateBytes, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            log.error("Error loading HTML template file: {}", templateName, e);
+            throw new RuntimeException("Error loading HTML template file", e);
+        }
     }
 }

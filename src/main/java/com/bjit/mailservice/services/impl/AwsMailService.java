@@ -3,6 +3,7 @@ package com.bjit.mailservice.services.impl;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.bjit.mailservice.models.MailContent;
 import com.bjit.mailservice.services.MailService;
+import jakarta.mail.MessagingException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -129,5 +130,10 @@ public class AwsMailService implements MailService, MailValidation {
             addressTo.add(new InternetAddress(address));
         }
         message.setRecipients(type, addressTo.toArray(new InternetAddress[0]));
+    }
+
+    @Override
+    public String sendHtmlTemplateMail(MailContent mailContent, String templateName) throws MessagingException {
+        return null;
     }
 }
