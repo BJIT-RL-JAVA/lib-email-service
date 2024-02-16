@@ -13,6 +13,7 @@ public class LibEmailServiceApplication {
         ApplicationContext applicationContext = SpringApplication.run(LibEmailServiceApplication.class, args);
 
         MailSender mailSender = applicationContext.getBean(MailSender.class);
-        mailSender.sendMail();
+//        mailSender.sendMail();
+        mailSender.sendMailWithHTMLTemplate();
     }
 }

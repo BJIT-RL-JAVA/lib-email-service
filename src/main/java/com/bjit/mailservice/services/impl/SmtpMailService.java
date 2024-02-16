@@ -161,6 +161,7 @@ public class SmtpMailService implements MailService, MailValidation {
     public void checkFileCompatibility(File file) {
         MailValidation.super.checkFileCompatibility(file);
     }
+
     @Override
     public String sendHtmlTemplateMail(MailContent mailContent, String templateName) throws MessagingException {
         try {
@@ -173,6 +174,7 @@ public class SmtpMailService implements MailService, MailValidation {
             throw e;
         }
     }
+
     private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent, String templateName)
             throws MessagingException {
         MimeMessage message = new MimeMessage(session);

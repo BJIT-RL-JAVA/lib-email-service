@@ -35,6 +35,22 @@ public class MailSender {
         mailService.sendMail(mailContent);
     }
 
+    public void sendMailWithHTMLTemplate() throws MessagingException {
+        MailContent mailContent = new MailContent();
+        mailContent.setFrom("khalid.hasan@bjitgroup.com");
+        mailContent.setTo(new ArrayList<>(Arrays.asList("mallika.dey@bjitgroup.com")));
+//        mailContent.setCc(new ArrayList<>(Arrays.asList("khalidhasan374@gmail.com", "connectkhalid404@gmail.com")));
+//        mailContent.setBcc(new ArrayList(Arrays.asList("khalidhasankibria@gmail.com", "connectkhalid404@gmail.com")));
+        mailContent.setSubject("Testing mail");
+        mailContent.setBody("Message body");
+        mailContent.setAttachments(
+                new ArrayList<>(Arrays.asList(
+                        new File("C:\\Users\\BJIT\\Downloads\\home.jpeg"))));
+        validateMailContent(mailContent);
+
+        mailService.sendHtmlTemplateMail(mailContent, "emailTemplate.html");
+    }
+
     private static void validateMailContent(MailContent mailContent) {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();

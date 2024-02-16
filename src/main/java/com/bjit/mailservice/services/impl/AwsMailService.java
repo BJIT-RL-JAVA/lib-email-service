@@ -7,9 +7,13 @@ import jakarta.mail.MessagingException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import com.amazonaws.services.simpleemail.model.RawMessage;
@@ -18,13 +22,14 @@ import com.bjit.mailservice.services.MailValidation;
 import jakarta.activation.DataHandler;
 import jakarta.activation.FileDataSource;
 import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
 import jakarta.mail.Multipart;
 import jakarta.mail.Session;
 import jakarta.mail.internet.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StreamUtils;
 
 /**
  * Implementation of the MailService interface for sending emails using AWS SES (Simple Email Service).
@@ -33,6 +38,7 @@ import org.springframework.util.ObjectUtils;
  * @author Mallika Dey
  */
 public class AwsMailService implements MailService, MailValidation {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsMailService.class);
     private final AmazonSimpleEmailService client;
 
     public AwsMailService(AmazonSimpleEmailService client) {
@@ -134,6 +140,58 @@ public class AwsMailService implements MailService, MailValidation {
 
     @Override
     public String sendHtmlTemplateMail(MailContent mailContent, String templateName) throws MessagingException {
-        return null;
+        Session session = Session.getDefaultInstance(new Properties());
+
+        MimeMessage message = generateMimeMessage(mailContent, session);
+
+        try {
+            String htmlContent = loadHtmlTemplate(templateName);
+
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            htmlPart.setContent(htmlContent, "text/html; charset=UTF-8");
+
+            Multipart multipart = new MimeMultipart();
+            multipart.addBodyPart(htmlPart);
+
+            if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
+                for (File file : mailContent.getAttachments()) {
+                    MimeBodyPart filePart = new MimeBodyPart();
+                    checkFileCompatibility(file);
+                    filePart.setDataHandler(new DataHandler(new FileDataSource(file)));
+                    filePart.setFileName(file.getName());
+                    multipart.addBodyPart(filePart);
+                }
+            }
+
+            message.setContent(multipart);
+
+            System.out.println("Attempting to send an template email through Amazon SES "
+                    + "using the AWS SDK for Java...");
+            PrintStream out = System.out;
+            message.writeTo(out);
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            message.writeTo(outputStream);
+
+            client.sendRawEmail(new SendRawEmailRequest(
+                    new RawMessage(ByteBuffer.wrap(outputStream.toByteArray()))));
+            System.out.println("Email sent!");
+        } catch (IOException ex) {
+            System.out.println("Email Failed");
+            System.err.println("Error message: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+        return "mail sent successfully";
+    }
+
+    private String loadHtmlTemplate(String templateName) {
+        try {
+            ClassPathResource resource = new ClassPathResource("templates/" + templateName);
+            byte[] templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
+            return new String(templateBytes, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            LOGGER.error("Error loading HTML template file: {}", templateName, e);
+            throw new RuntimeException("Error loading HTML template file", e);
+        }
     }
 }
