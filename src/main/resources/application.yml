@@ -14,4 +14,4 @@ sendgrid:
     key:
 mail:
   service:
-    type: sendgrid
+    type: smtp

@@ -29,8 +29,7 @@ public class MailSender {
         mailContent.setBody("Message body");
         mailContent.setAttachments(
                 new ArrayList<>(Arrays.asList(
-                        new File("C:\\Users\\Bjit\\Documents\\SMTP.docx"),
-                        new File("C:\\Users\\Bjit\\Desktop\\sss.txt"))));
+                        new File("C:\\Users\\BJIT\\Downloads\\home.jpeg"))));
         validateMailContent(mailContent);
 
         mailService.sendMail(mailContent);

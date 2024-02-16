@@ -89,6 +89,11 @@ public class SendGridMailService implements MailService, MailValidation {
     }
 
     @Override
+    public String sendHtmlTemplateMail(MailContent mailContent, String templateName) throws MessagingException {
+        return null;
+    }
+
+    @Override
     public void checkFileCompatibility(File file) {
         MailValidation.super.checkFileCompatibility(file);
     }
