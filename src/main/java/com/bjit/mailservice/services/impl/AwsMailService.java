@@ -57,46 +57,31 @@ public class AwsMailService implements MailService, MailValidation {
 
         MimeBodyPart textPart = new MimeBodyPart();
         textPart.setContent(mailContent.getBody(), "text/plain; charset=UTF-8");
+        msg_body.addBodyPart(textPart);
 
         MimeBodyPart htmlPart = new MimeBodyPart();
-        htmlPart.setContent(mailContent.getBody(), "text/html; charset=UTF-8");
 
-        msg_body.addBodyPart(textPart);
-        msg_body.addBodyPart(htmlPart);
-
-        wrap.setContent(msg_body);
-
-        Multipart multipart = new MimeMultipart();
-        multipart.addBodyPart(wrap);
-
-        if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
-            for (File file : mailContent.getAttachments()) {
-                MimeBodyPart filePart = new MimeBodyPart();
-                checkFileCompatibility(file);
-                filePart.setDataHandler(new DataHandler(new FileDataSource(file)));
-                filePart.setFileName(file.getName());
-                multipart.addBodyPart(filePart);
-            }
-        }
-        message.setContent(multipart);
         try {
-            System.out.println("Attempting to send an email through Amazon SES "
-                    + "using the AWS SDK for Java...");
-
-            PrintStream out = System.out;
-            message.writeTo(out);
-
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            message.writeTo(outputStream);
-            RawMessage rawMessage =
-                    new RawMessage(ByteBuffer.wrap(outputStream.toByteArray()));
-
-            SendRawEmailRequest rawEmailRequest =
-                    new SendRawEmailRequest(rawMessage);
-
-            client.sendRawEmail(rawEmailRequest);
-            System.out.println("Email sent!");
+            mailSend(mailContent.getBody(), mailContent, message);
         } catch (Exception ex) {
+            System.out.println("Email Failed");
+            System.err.println("Error message: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+        return "mail sent successfully";
+    }
+
+    @Override
+    public String sendHtmlTemplateMail(MailContent mailContent, String templateName) throws MessagingException {
+        Session session = Session.getDefaultInstance(new Properties());
+
+        MimeMessage message = generateMimeMessage(mailContent, session);
+
+        try {
+            String htmlContent = loadHtmlTemplate(templateName);
+            mailSend(htmlContent, mailContent, message);
+
+        } catch (IOException ex) {
             System.out.println("Email Failed");
             System.err.println("Error message: " + ex.getMessage());
             ex.printStackTrace();
@@ -138,50 +123,37 @@ public class AwsMailService implements MailService, MailValidation {
         message.setRecipients(type, addressTo.toArray(new InternetAddress[0]));
     }
 
-    @Override
-    public String sendHtmlTemplateMail(MailContent mailContent, String templateName) throws MessagingException {
-        Session session = Session.getDefaultInstance(new Properties());
+    private void mailSend(String htmlContent, MailContent mailContent
+            , MimeMessage message) throws MessagingException, IOException {
+        MimeBodyPart htmlPart = new MimeBodyPart();
+        htmlPart.setContent(htmlContent, "text/html; charset=UTF-8");
 
-        MimeMessage message = generateMimeMessage(mailContent, session);
+        Multipart multipart = new MimeMultipart();
+        multipart.addBodyPart(htmlPart);
 
-        try {
-            String htmlContent = loadHtmlTemplate(templateName);
-
-            MimeBodyPart htmlPart = new MimeBodyPart();
-            htmlPart.setContent(htmlContent, "text/html; charset=UTF-8");
-
-            Multipart multipart = new MimeMultipart();
-            multipart.addBodyPart(htmlPart);
-
-            if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
-                for (File file : mailContent.getAttachments()) {
-                    MimeBodyPart filePart = new MimeBodyPart();
-                    checkFileCompatibility(file);
-                    filePart.setDataHandler(new DataHandler(new FileDataSource(file)));
-                    filePart.setFileName(file.getName());
-                    multipart.addBodyPart(filePart);
-                }
+        if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
+            for (File file : mailContent.getAttachments()) {
+                MimeBodyPart filePart = new MimeBodyPart();
+                checkFileCompatibility(file);
+                filePart.setDataHandler(new DataHandler(new FileDataSource(file)));
+                filePart.setFileName(file.getName());
+                multipart.addBodyPart(filePart);
             }
-
-            message.setContent(multipart);
-
-            System.out.println("Attempting to send an template email through Amazon SES "
-                    + "using the AWS SDK for Java...");
-            PrintStream out = System.out;
-            message.writeTo(out);
-
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            message.writeTo(outputStream);
-
-            client.sendRawEmail(new SendRawEmailRequest(
-                    new RawMessage(ByteBuffer.wrap(outputStream.toByteArray()))));
-            System.out.println("Email sent!");
-        } catch (IOException ex) {
-            System.out.println("Email Failed");
-            System.err.println("Error message: " + ex.getMessage());
-            ex.printStackTrace();
         }
-        return "mail sent successfully";
+
+        message.setContent(multipart);
+
+        System.out.println("Attempting to send an template email through Amazon SES "
+                + "using the AWS SDK for Java...");
+        PrintStream out = System.out;
+        message.writeTo(out);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        message.writeTo(outputStream);
+
+        client.sendRawEmail(new SendRawEmailRequest(
+                new RawMessage(ByteBuffer.wrap(outputStream.toByteArray()))));
+        System.out.println("Email sent!");
     }
 
     private String loadHtmlTemplate(String templateName) {

@@ -48,7 +48,7 @@ public class MailSender {
                         new File("C:\\Users\\BJIT\\Downloads\\home.jpeg"))));
         validateMailContent(mailContent);
 
-        mailService.sendHtmlTemplateMail(mailContent, "emailTemplate.html");
+        mailService.sendHtmlTemplateMail(mailContent, "welcome.html");
     }
 
     private static void validateMailContent(MailContent mailContent) {
