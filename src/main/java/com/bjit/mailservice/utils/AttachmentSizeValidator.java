@@ -3,6 +3,7 @@ package com.bjit.mailservice.utils;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.ObjectUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class AttachmentSizeValidator implements ConstraintValidator<ValidAttachm
 
     @Override
     public boolean isValid(ArrayList<File> files, ConstraintValidatorContext constraintValidatorContext) {
-        if (files == null || files.isEmpty()) {
+        if (ObjectUtils.isEmpty(files) || files.isEmpty()) {
             return true;
         }
         long totalSize = 0;
