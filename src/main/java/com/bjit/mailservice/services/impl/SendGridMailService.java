@@ -4,8 +4,7 @@ import com.bjit.mailservice.services.MailService;
 import com.bjit.mailservice.services.MailValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.core.io.ClassPathResource;
 import com.bjit.mailservice.models.MailContent;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
@@ -17,9 +16,11 @@ import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
 import jakarta.mail.MessagingException;
+import org.springframework.util.StreamUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Base64;
 
@@ -30,7 +31,7 @@ import java.util.Base64;
  * @author Mallika Dey
  */
 public class SendGridMailService implements MailService, MailValidation {
-    private static final Logger logger = LoggerFactory.getLogger(SendGridMailService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SendGridMailService.class);
 
     private SendGrid sendGrid;
 
@@ -59,6 +60,30 @@ public class SendGridMailService implements MailService, MailValidation {
         mail.setSubject(mailContent.getSubject());
         mail.addContent(new Content("text/plain", mailContent.getBody()));
 
+        mailSendUsingSendGrid(mailContent, mail);
+        return "mail sent successfully";
+    }
+
+    @Override
+    public String sendHtmlTemplateMail(MailContent mailContent, String templateName) throws MessagingException {
+        Mail mail = new Mail();
+        mail.setFrom(new Email(mailContent.getFrom()));
+
+        Personalization personalization = new Personalization();
+        for (String toEmail : mailContent.getTo()) {
+            personalization.addTo(new Email(toEmail));
+        }
+
+        mail.addPersonalization(personalization);
+        mail.setSubject(mailContent.getSubject());
+        mail.addContent(new Content("text/plain", mailContent.getBody()));
+        mail.addContent(new Content("text/html", loadHtmlTemplate(templateName)));
+
+        mailSendUsingSendGrid(mailContent, mail);
+        return "mail sent successfully";
+    }
+
+    private void mailSendUsingSendGrid(MailContent mailContent, Mail mail) {
         try {
             for (File attachment : mailContent.getAttachments()) {
                 byte[] fileContent = Files.readAllBytes(attachment.toPath());
@@ -68,8 +93,7 @@ public class SendGridMailService implements MailService, MailValidation {
                 mail.addAttachments(sendGridAttachment);
             }
         } catch (IOException ex) {
-            logger.error("IO exception occured ", ex);
-            throw new MessagingException("Failed to send mail ", ex);
+            LOGGER.error("IO exception occured ", ex);
         }
 
         Request request = new Request();
@@ -82,19 +106,23 @@ public class SendGridMailService implements MailService, MailValidation {
             System.out.println(response.getBody());
             System.out.println(response.getHeaders());
         } catch (IOException ex) {
-            logger.error("IO exception occur in request ", ex);
-            throw new MessagingException("Failed to send mail ", ex);
+            LOGGER.error("IO exception occur in request ", ex);
         }
-        return "mail sent successfully";
-    }
-
-    @Override
-    public String sendHtmlTemplateMail(MailContent mailContent, String templateName) throws MessagingException {
-        return null;
     }
 
     @Override
     public void checkFileCompatibility(File file) {
         MailValidation.super.checkFileCompatibility(file);
+    }
+
+    private String loadHtmlTemplate(String templateName) {
+        try {
+            ClassPathResource resource = new ClassPathResource("templates/" + templateName);
+            byte[] templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
+            return new String(templateBytes, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            LOGGER.error("Error loading HTML template file: {}", templateName, e);
+            throw new RuntimeException("Error loading HTML template file", e);
+        }
     }
 }
