@@ -28,7 +28,7 @@ public class MailSender {
         mailContent.setAttachments(
                 new ArrayList<>(Arrays.asList(
                         new File("C:\\Users\\Bjit\\Desktop\\sss.txt"))));
-        ValidationService.validateMailContent(mailContent);
+        MailContentValidation.validateMailContent(mailContent);
 
         mailService.sendMail(mailContent);
     }
@@ -44,7 +44,7 @@ public class MailSender {
         mailContent.setAttachments(
                 new ArrayList<>(Arrays.asList(
                         new File("C:\\Users\\BJIT\\Downloads\\home.jpeg"))));
-        ValidationService.validateMailContent(mailContent);
+        MailContentValidation.validateMailContent(mailContent);
 
         mailService.sendHtmlTemplateMail(mailContent, "welcome.html");
     }

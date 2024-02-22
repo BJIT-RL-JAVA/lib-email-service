@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * @author Mallika Dey
  */
-public class ValidationService {
+public class MailContentValidation {
     public static void validateMailContent(MailContent mailContent) {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
