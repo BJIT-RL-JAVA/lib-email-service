@@ -2,12 +2,10 @@ package com.bjit.mailservice.services;
 
 import com.bjit.mailservice.models.MailContent;
 import jakarta.mail.MessagingException;
-import jakarta.validation.*;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Set;
 
 /**
  * @author Mallika Dey
@@ -29,8 +27,8 @@ public class MailSender {
         mailContent.setBody("Message body");
         mailContent.setAttachments(
                 new ArrayList<>(Arrays.asList(
-                        new File("C:\\Users\\BJIT\\Downloads\\home.jpeg"))));
-        validateMailContent(mailContent);
+                        new File("C:\\Users\\Bjit\\Desktop\\sss.txt"))));
+        ValidationService.validateMailContent(mailContent);
 
         mailService.sendMail(mailContent);
     }
@@ -46,18 +44,8 @@ public class MailSender {
         mailContent.setAttachments(
                 new ArrayList<>(Arrays.asList(
                         new File("C:\\Users\\BJIT\\Downloads\\home.jpeg"))));
-        validateMailContent(mailContent);
+        ValidationService.validateMailContent(mailContent);
 
         mailService.sendHtmlTemplateMail(mailContent, "welcome.html");
-    }
-
-    private static void validateMailContent(MailContent mailContent) {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        Validator validator = factory.getValidator();
-        Set<ConstraintViolation<MailContent>> violations = validator.validate(mailContent);
-
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }
     }
 }
