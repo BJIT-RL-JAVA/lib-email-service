@@ -57,10 +57,10 @@ public class SmtpMailService implements MailService, MailValidation {
     }
 
     @Override
-    public String sendHtmlTemplateMail(MailContent mailContent, String templateName) throws MessagingException {
+    public String sendHtmlTemplateMail(MailContent mailContent) throws MessagingException {
         try {
             Session session = createSmtpSession();
-            MimeMessage message =   createTemplateMimeMessage(session, mailContent, templateName);
+            MimeMessage message = createTemplateMimeMessage(session, mailContent);
             Transport.send(message);
             return "HTML template mail has been sent successfully.";
         } catch (MessagingException e) {
@@ -121,8 +121,11 @@ public class SmtpMailService implements MailService, MailValidation {
         }
         return message;
     }
-    private Address[] createInternetAddresses(List<String> addresses)
-            throws AddressException {
+    private Address[] createInternetAddresses(List<String> addresses) throws AddressException {
+        if (addresses == null) {
+            return new Address[0]; // Return an empty array if the addresses list is null
+        }
+
         Address[] internetAddresses = new Address[addresses.size()];
         for (int i = 0; i < addresses.size(); i++) {
             internetAddresses[i] = new InternetAddress(addresses.get(i));
@@ -179,11 +182,18 @@ public class SmtpMailService implements MailService, MailValidation {
             throw new RuntimeException("Error loading HTML template file", e);
         }
     }
-    private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent, String templateName)
+    private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent)
             throws MessagingException {
         MimeMessage message = new MimeMessage(session);
         setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
-        String htmlContent = loadHtmlTemplate(templateName);
+        String htmlContent;
+
+        if (mailContent.getHtmlTemplate() != null && !mailContent.getHtmlTemplate().isEmpty()) {
+            htmlContent = mailContent.getHtmlTemplate();
+        } else {
+            // Load default HTML template if custom template is not provided
+            htmlContent = loadHtmlTemplate("welcome.html");
+        }
 
         // Inject dynamic content into the HTML template
         htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
@@ -191,5 +201,4 @@ public class SmtpMailService implements MailService, MailValidation {
         message.setContent(htmlContent, "text/html");
         return message;
     }
-
 }
