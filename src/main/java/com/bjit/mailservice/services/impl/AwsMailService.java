@@ -66,11 +66,11 @@ public class AwsMailService implements MailService, MailValidation {
     }
 
     @Override
-    public String sendHtmlTemplateMail(MailContent mailContent, String templateName) throws MessagingException {
+    public String sendHtmlTemplateMail(MailContent mailContent) throws MessagingException {
         Session session = Session.getDefaultInstance(new Properties());
 
         MimeMessage message = generateMimeMessage(mailContent, session);
-        String htmlContent = loadHtmlTemplate(templateName);
+        String htmlContent = loadHtmlTemplate("welcome.html");
         mailSend(htmlContent, mailContent, message);
         return "mail sent successfully";
     }
