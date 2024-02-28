@@ -32,6 +32,7 @@ public class MailContent {
     private ArrayList<@NotNull String> bcc;
     private String subject;
     private String body;
+    private String htmlTemplate;
 
     @ValidAttachmentSize(groups = {Default.class, ValidAttachment.class})
     private ArrayList<File> attachments;

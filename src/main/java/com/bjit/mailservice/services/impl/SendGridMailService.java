@@ -66,7 +66,7 @@ public class SendGridMailService implements MailService, MailValidation {
     }
 
     @Override
-    public String sendHtmlTemplateMail(MailContent mailContent, String templateName) throws MessagingException {
+    public String sendHtmlTemplateMail(MailContent mailContent) throws MessagingException {
         Mail mail = new Mail();
         mail.setFrom(new Email(mailContent.getFrom()));
 
@@ -78,7 +78,7 @@ public class SendGridMailService implements MailService, MailValidation {
         mail.addPersonalization(personalization);
         mail.setSubject(mailContent.getSubject());
         mail.addContent(new Content("text/plain", mailContent.getBody()));
-        mail.addContent(new Content("text/html", loadHtmlTemplate(templateName)));
+        mail.addContent(new Content("text/html", loadHtmlTemplate("welcome.html")));
 
         mailSendUsingSendGrid(mailContent, mail);
         return "mail sent successfully";

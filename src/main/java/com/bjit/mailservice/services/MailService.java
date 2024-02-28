@@ -21,6 +21,6 @@ public interface MailService {
      *         It could be a success message or an error message.
      */
     String sendMail(MailContent mailContent) throws MessagingException;
-    String sendHtmlTemplateMail(MailContent mailContent, String templateName)  throws MessagingException;
+    String sendHtmlTemplateMail(MailContent mailContent)  throws MessagingException;
 }
 

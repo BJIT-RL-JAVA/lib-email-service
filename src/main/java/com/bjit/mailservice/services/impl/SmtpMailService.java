@@ -56,6 +56,18 @@ public class SmtpMailService implements MailService, MailValidation {
         }
     }
 
+    @Override
+    public String sendHtmlTemplateMail(MailContent mailContent) throws MessagingException {
+        try {
+            Session session = createSmtpSession();
+            MimeMessage message = createTemplateMimeMessage(session, mailContent);
+            Transport.send(message);
+            return "HTML template mail has been sent successfully.";
+        } catch (MessagingException e) {
+            log.error("Error sending HTML template email", e);
+            throw e;
+        }
+    }
     private Session createSmtpSession() {
         Properties properties = new Properties();
         properties.put("mail.smtp.auth", true);
@@ -71,7 +83,6 @@ public class SmtpMailService implements MailService, MailValidation {
             }
         });
     }
-
     /**
      * Creates a MimeMessage for the specified mail content.
      *
@@ -92,10 +103,8 @@ public class SmtpMailService implements MailService, MailValidation {
             throw new RuntimeException(e);
         }
         message.setContent(multipart);
-
         return message;
     }
-
     private MimeMessage setEmailHeader(MimeMessage message, List<String> to,
                                        List<String> cc, List<String> bcc, String subject) {
         try {
@@ -112,16 +121,17 @@ public class SmtpMailService implements MailService, MailValidation {
         }
         return message;
     }
+    private Address[] createInternetAddresses(List<String> addresses) throws AddressException {
+        if (addresses == null) {
+            return new Address[0]; // Return an empty array if the addresses list is null
+        }
 
-    private Address[] createInternetAddresses(List<String> addresses)
-            throws AddressException {
         Address[] internetAddresses = new Address[addresses.size()];
         for (int i = 0; i < addresses.size(); i++) {
             internetAddresses[i] = new InternetAddress(addresses.get(i));
         }
         return internetAddresses;
     }
-
     /**
      * Adds a text part to the specified multipart content.
      *
@@ -161,29 +171,6 @@ public class SmtpMailService implements MailService, MailValidation {
     public void checkFileCompatibility(File file) {
         MailValidation.super.checkFileCompatibility(file);
     }
-
-    @Override
-    public String sendHtmlTemplateMail(MailContent mailContent, String templateName) throws MessagingException {
-        try {
-            Session session = createSmtpSession();
-            MimeMessage message = createTemplateMimeMessage(session, mailContent, templateName);
-            Transport.send(message);
-            return "HTML template mail has been sent successfully.";
-        } catch (MessagingException e) {
-            log.error("Error sending HTML template email", e);
-            throw e;
-        }
-    }
-
-    private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent, String templateName)
-            throws MessagingException {
-        MimeMessage message = new MimeMessage(session);
-        setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
-        String htmlContent = loadHtmlTemplate(templateName);
-        message.setContent(htmlContent, "text/html");
-        return message;
-    }
-
     private String loadHtmlTemplate(String templateName) {
         try {
             // Load HTML content from the template file in the resources/templates directory
@@ -194,5 +181,24 @@ public class SmtpMailService implements MailService, MailValidation {
             log.error("Error loading HTML template file: {}", templateName, e);
             throw new RuntimeException("Error loading HTML template file", e);
         }
+    }
+    private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent)
+            throws MessagingException {
+        MimeMessage message = new MimeMessage(session);
+        setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
+        String htmlContent;
+
+        if (mailContent.getHtmlTemplate() != null && !mailContent.getHtmlTemplate().isEmpty()) {
+            htmlContent = mailContent.getHtmlTemplate();
+        } else {
+            // Load default HTML template if custom template is not provided
+            htmlContent = loadHtmlTemplate("welcome.html");
+        }
+
+        // Inject dynamic content into the HTML template
+        htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
+
+        message.setContent(htmlContent, "text/html");
+        return message;
     }
 }
