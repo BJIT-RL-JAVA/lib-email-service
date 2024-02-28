@@ -20,7 +20,6 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = { AttachmentSizeValidator.class })
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-@NotNull(groups = { Default.class, ValidAttachment.class })
 @Size(max = 25, groups = { Default.class, ValidAttachment.class })
 @ReportAsSingleViolation
 public @interface ValidAttachmentSize {

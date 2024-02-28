@@ -16,6 +16,7 @@ import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
 import jakarta.mail.MessagingException;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
 
 import java.io.File;
@@ -84,16 +85,19 @@ public class SendGridMailService implements MailService, MailValidation {
     }
 
     private void mailSendUsingSendGrid(MailContent mailContent, Mail mail) {
-        try {
+        if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
             for (File attachment : mailContent.getAttachments()) {
-                byte[] fileContent = Files.readAllBytes(attachment.toPath());
-                Attachments sendGridAttachment = new Attachments();
-                sendGridAttachment.setContent(new String(Base64.getEncoder().encode(fileContent)));
-                sendGridAttachment.setFilename(attachment.getName());
-                mail.addAttachments(sendGridAttachment);
+
+                try {
+                    byte[] fileContent = Files.readAllBytes(attachment.toPath());
+                    Attachments sendGridAttachment = new Attachments();
+                    sendGridAttachment.setContent(new String(Base64.getEncoder().encode(fileContent)));
+                    sendGridAttachment.setFilename(attachment.getName());
+                    mail.addAttachments(sendGridAttachment);
+                } catch (IOException ex) {
+                    LOGGER.error("IO exception occured ", ex);
+                }
             }
-        } catch (IOException ex) {
-            LOGGER.error("IO exception occured ", ex);
         }
 
         Request request = new Request();
@@ -102,9 +106,7 @@ public class SendGridMailService implements MailService, MailValidation {
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
             Response response = sendGrid.api(request);
-            System.out.println(response.getStatusCode());
-            System.out.println(response.getBody());
-            System.out.println(response.getHeaders());
+            LOGGER.info("Calling sendgrid api {} {}", response.getStatusCode(), response.getBody());
         } catch (IOException ex) {
             LOGGER.error("IO exception occur in request ", ex);
         }
