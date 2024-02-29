@@ -70,7 +70,10 @@ public class AwsMailService implements MailService, MailValidation {
         Session session = Session.getDefaultInstance(new Properties());
 
         MimeMessage message = generateMimeMessage(mailContent, session);
-        String htmlContent = loadHtmlTemplate("welcome.html");
+        String htmlContent = (mailContent.getHtmlTemplate() == null) ?
+                loadHtmlTemplate("welcome.html") : mailContent.getHtmlTemplate();
+
+        htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
         mailSend(htmlContent, mailContent, message);
         return "mail sent successfully";
     }

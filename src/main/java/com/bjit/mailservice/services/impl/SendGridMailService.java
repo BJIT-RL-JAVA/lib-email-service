@@ -75,10 +75,14 @@ public class SendGridMailService implements MailService, MailValidation {
             personalization.addTo(new Email(toEmail));
         }
 
+        String htmlContent = (mailContent.getHtmlTemplate() == null) ?
+                loadHtmlTemplate("welcome.html") : mailContent.getHtmlTemplate();
+
+        htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
         mail.addPersonalization(personalization);
         mail.setSubject(mailContent.getSubject());
         mail.addContent(new Content("text/plain", mailContent.getBody()));
-        mail.addContent(new Content("text/html", loadHtmlTemplate("welcome.html")));
+        mail.addContent(new Content("text/html", htmlContent));
 
         mailSendUsingSendGrid(mailContent, mail);
         return "mail sent successfully";
