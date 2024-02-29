@@ -4,6 +4,12 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Interface for validating files based on compatibility criteria.
+ * Implementations should provide methods for various file validation checks.
+ *
+ * @author Mallika Dey
+ */
 public interface MailValidation {
 
     /**
