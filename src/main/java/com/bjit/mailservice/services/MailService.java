@@ -13,14 +13,9 @@ import jakarta.mail.MessagingException;
  * @author Mallika Dey
  */
 public interface MailService {
-    /**
-     * Sends an email with the specified mail content.
-     *
-     * @param mailContent The content of the email to be sent.
-     * @return A message indicating the result of the email sending operation.
-     *         It could be a success message or an error message.
-     */
+
     String sendMail(MailContent mailContent) throws MessagingException;
-    String sendHtmlTemplateMail(MailContent mailContent)  throws MessagingException;
+
+    String sendHtmlTemplateMail(MailContent mailContent) throws MessagingException;
 }
 
