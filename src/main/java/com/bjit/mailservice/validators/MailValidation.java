@@ -1,4 +1,4 @@
-package com.bjit.mailservice.services;
+package com.bjit.mailservice.validators;
 
 import java.io.File;
 import java.util.Arrays;

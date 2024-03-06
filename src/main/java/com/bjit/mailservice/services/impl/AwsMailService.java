@@ -3,6 +3,7 @@ package com.bjit.mailservice.services.impl;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.bjit.mailservice.models.MailContent;
 import com.bjit.mailservice.services.MailService;
+import com.bjit.mailservice.validators.MailValidation;
 import jakarta.mail.MessagingException;
 
 import java.io.ByteArrayOutputStream;
@@ -12,13 +13,10 @@ import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 import com.amazonaws.services.simpleemail.model.RawMessage;
 import com.amazonaws.services.simpleemail.model.SendRawEmailRequest;
-import com.bjit.mailservice.services.MailValidation;
 import jakarta.activation.DataHandler;
 import jakarta.activation.FileDataSource;
 import jakarta.mail.Message;

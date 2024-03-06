@@ -14,7 +14,7 @@ package com.bjit.mailservice.services.impl;
 import com.bjit.mailservice.exception.EmailException;
 import com.bjit.mailservice.models.MailContent;
 import com.bjit.mailservice.services.MailService;
-import com.bjit.mailservice.services.MailValidation;
+import com.bjit.mailservice.validators.MailValidation;
 import jakarta.activation.DataHandler;
 import jakarta.activation.FileDataSource;
 import jakarta.mail.*;
