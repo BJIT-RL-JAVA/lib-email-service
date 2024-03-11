@@ -61,8 +61,7 @@ public class SendGridMailService implements MailService, MailValidation {
         mail.setSubject(mailContent.getSubject());
         mail.addContent(new Content("text/plain", mailContent.getBody()));
 
-        mailSendUsingSendGrid(mailContent, mail);
-        return "mail sent successfully";
+        return mailSendUsingSendGrid(mailContent, mail);
     }
 
     @Override
@@ -84,15 +83,15 @@ public class SendGridMailService implements MailService, MailValidation {
         mail.addContent(new Content("text/plain", mailContent.getBody()));
         mail.addContent(new Content("text/html", htmlContent));
 
-        mailSendUsingSendGrid(mailContent, mail);
-        return "mail sent successfully";
+        return mailSendUsingSendGrid(mailContent, mail);
     }
 
-    private void mailSendUsingSendGrid(MailContent mailContent, Mail mail) {
+    private String mailSendUsingSendGrid(MailContent mailContent, Mail mail) {
         if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
             for (File attachment : mailContent.getAttachments()) {
 
                 try {
+                    checkFileCompatibility(attachment);
                     byte[] fileContent = Files.readAllBytes(attachment.toPath());
                     Attachments sendGridAttachment = new Attachments();
                     sendGridAttachment.setContent(new String(Base64.getEncoder().encode(fileContent)));
@@ -100,6 +99,7 @@ public class SendGridMailService implements MailService, MailValidation {
                     mail.addAttachments(sendGridAttachment);
                 } catch (IOException ex) {
                     LOGGER.error("IO exception occured ", ex);
+                    return "mail sending failed";
                 }
             }
         }
@@ -113,12 +113,9 @@ public class SendGridMailService implements MailService, MailValidation {
             LOGGER.info("Calling sendgrid api {} {}", response.getStatusCode(), response.getBody());
         } catch (IOException ex) {
             LOGGER.error("IO exception occur in request ", ex);
+            return "mail sending failed";
         }
-    }
-
-    @Override
-    public void checkFileCompatibility(File file) {
-        MailValidation.super.checkFileCompatibility(file);
+        return "mail sent successfully";
     }
 
     private String loadHtmlTemplate(String templateName) {

@@ -1,6 +1,8 @@
 package com.bjit.mailservice.validators;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,9 +20,9 @@ public interface MailValidation {
      * @param file The file to be checked for compatibility.
      * @throws IllegalArgumentException if the file is null or if it has an unsupported file type.
      */
-    default void checkFileCompatibility(File file) {
+    default void checkFileCompatibility(File file) throws IOException {
         if (!file.exists()) {
-            throw new IllegalArgumentException("File does not exist: " + file.getAbsolutePath());
+            throw new IOException("File does not exist: " + file.getAbsolutePath());
         }
         String fileName = file.getName();
         String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();

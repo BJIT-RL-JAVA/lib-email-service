@@ -59,8 +59,7 @@ public class AwsMailService implements MailService, MailValidation {
 
         MimeBodyPart htmlPart = new MimeBodyPart();
 
-        mailSend(mailContent.getBody(), mailContent, message);
-        return "mail sent successfully";
+        return mailSend(mailContent.getBody(), mailContent, message);
     }
 
     @Override
@@ -72,8 +71,7 @@ public class AwsMailService implements MailService, MailValidation {
                 loadHtmlTemplate("welcome.html") : mailContent.getHtmlTemplate();
 
         htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
-        mailSend(htmlContent, mailContent, message);
-        return "mail sent successfully";
+        return mailSend(htmlContent, mailContent, message);
     }
 
     private MimeMessage generateMimeMessage(MailContent mailContent,
@@ -110,8 +108,8 @@ public class AwsMailService implements MailService, MailValidation {
         message.setRecipients(type, addressTo.toArray(new InternetAddress[0]));
     }
 
-    private void mailSend(String htmlContent, MailContent mailContent
-            , MimeMessage message) {
+    private String mailSend(String htmlContent, MailContent mailContent
+            , MimeMessage message) throws MessagingException {
         try {
             MimeBodyPart htmlPart = new MimeBodyPart();
 
@@ -142,11 +140,11 @@ public class AwsMailService implements MailService, MailValidation {
 
             client.sendRawEmail(new SendRawEmailRequest(
                     new RawMessage(ByteBuffer.wrap(outputStream.toByteArray()))));
-        } catch (MessagingException ex) {
-            LOGGER.error("Error sending email", ex);
         } catch (IOException ex) {
             LOGGER.error("Error sending email content", ex);
+            return "mail sending failed";
         }
+        return "mail sent successfully";
     }
 
     private String loadHtmlTemplate(String templateName) {
