@@ -75,8 +75,7 @@ public class SendGridMailService implements MailService, MailValidation {
             personalization.addTo(new Email(toEmail));
         }
 
-        String htmlContent = (mailContent.getHtmlTemplate() == null) ?
-                loadHtmlTemplate("welcome.html") : mailContent.getHtmlTemplate();
+        String htmlContent = loadHtmlTemplate( mailContent.getHtmlTemplate());
 
         htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
         mail.addPersonalization(personalization);
@@ -121,14 +120,35 @@ public class SendGridMailService implements MailService, MailValidation {
         MailValidation.super.checkFileCompatibility(file);
     }
 
-    private String loadHtmlTemplate(String templateName) {
+    private String loadHtmlTemplate(File htmlTemplateFile) {
+        String templateName = null;
+        byte[] templateBytes;
         try {
-            ClassPathResource resource = new ClassPathResource("templates/" + templateName);
-            byte[] templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
+            if (htmlTemplateFile != null && htmlTemplateFile.exists()) {
+                templateBytes= Files.readAllBytes(htmlTemplateFile.toPath());
+            } else {
+                templateName = "welcome.html";
+                // Load HTML content from the template file in the resources/templates directory
+                ClassPathResource resource = new ClassPathResource("templates/" + templateName);
+                templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
+            }
+
             return new String(templateBytes, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            LOGGER.error("Error loading HTML template file: {}", templateName, e);
+            log.error("Error loading HTML template file: {}", templateName, e);
             throw new RuntimeException("Error loading HTML template file", e);
         }
+    }
+    private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent)
+            throws MessagingException {
+        MimeMessage message = new MimeMessage(session);
+        setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
+        String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate());
+
+        // Inject dynamic content into the HTML template
+        //htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
+
+        message.setContent(htmlContent, "text/html");
+        return message;
     }
 }

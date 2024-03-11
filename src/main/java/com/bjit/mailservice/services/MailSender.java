@@ -3,11 +3,6 @@ package com.bjit.mailservice.services;
 import com.bjit.mailservice.models.MailContent;
 import jakarta.mail.MessagingException;
 import org.springframework.stereotype.Service;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 /**
  * Service class for sending emails using a provided MailService implementation.
  * This class provides methods to send plain text emails and emails with HTML templates.

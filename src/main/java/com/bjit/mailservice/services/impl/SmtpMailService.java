@@ -27,6 +27,7 @@ import org.springframework.util.StreamUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Properties;
 
@@ -171,11 +172,19 @@ public class SmtpMailService implements MailService, MailValidation {
     public void checkFileCompatibility(File file) {
         MailValidation.super.checkFileCompatibility(file);
     }
-    private String loadHtmlTemplate(String templateName) {
+    private String loadHtmlTemplate(File htmlTemplateFile) {
+        String templateName = null;
+        byte[] templateBytes;
         try {
-            // Load HTML content from the template file in the resources/templates directory
-            ClassPathResource resource = new ClassPathResource("templates/" + templateName);
-            byte[] templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
+            if (htmlTemplateFile != null && htmlTemplateFile.exists()) {
+                templateBytes= Files.readAllBytes(htmlTemplateFile.toPath());
+            } else {
+                templateName = "welcome.html";
+                // Load HTML content from the template file in the resources/templates directory
+                ClassPathResource resource = new ClassPathResource("templates/" + templateName);
+                templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
+            }
+
             return new String(templateBytes, StandardCharsets.UTF_8);
         } catch (IOException e) {
             log.error("Error loading HTML template file: {}", templateName, e);
@@ -186,17 +195,10 @@ public class SmtpMailService implements MailService, MailValidation {
             throws MessagingException {
         MimeMessage message = new MimeMessage(session);
         setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
-        String htmlContent;
-
-        if (mailContent.getHtmlTemplate() != null && !mailContent.getHtmlTemplate().isEmpty()) {
-            htmlContent = mailContent.getHtmlTemplate();
-        } else {
-            // Load default HTML template if custom template is not provided
-            htmlContent = loadHtmlTemplate("welcome.html");
-        }
+        String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate());
 
         // Inject dynamic content into the HTML template
-        htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
+        //htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
 
         message.setContent(htmlContent, "text/html");
         return message;

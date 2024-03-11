@@ -32,8 +32,23 @@ public class MailContent {
     private ArrayList<@NotNull String> bcc;
     private String subject;
     private String body;
-    private String htmlTemplate;
+    private File htmlTemplate;
 
     @ValidAttachmentSize(groups = {Default.class, ValidAttachment.class})
     private ArrayList<File> attachments;
+    // Custom setter for htmlTemplate with validation
+    public void setHtmlTemplate(File htmlTemplate) {
+        if (htmlTemplate != null && htmlTemplate.isFile() && htmlTemplate.getName().endsWith(".html")) {
+            // Check file size
+            long fileSizeInBytes = htmlTemplate.length();
+            long fileSizeInMB = fileSizeInBytes / (1024 * 1024); // Convert bytes to MB
+            if (fileSizeInMB <= 5) {
+                this.htmlTemplate = htmlTemplate;
+            } else {
+                throw new IllegalArgumentException("File size exceeds the maximum limit of 5MB.");
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid File! Please provide an HTML file only.");
+        }
+    }
 }

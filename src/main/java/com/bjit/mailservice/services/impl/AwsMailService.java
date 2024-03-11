@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,8 +71,7 @@ public class AwsMailService implements MailService, MailValidation {
         Session session = Session.getDefaultInstance(new Properties());
 
         MimeMessage message = generateMimeMessage(mailContent, session);
-        String htmlContent = (mailContent.getHtmlTemplate() == null) ?
-                loadHtmlTemplate("welcome.html") : mailContent.getHtmlTemplate();
+        String htmlContent = loadHtmlTemplate( mailContent.getHtmlTemplate());
 
         htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
         mailSend(htmlContent, mailContent, message);
@@ -151,10 +151,19 @@ public class AwsMailService implements MailService, MailValidation {
         }
     }
 
-    private String loadHtmlTemplate(String templateName) {
+    private String loadHtmlTemplate(File htmlTemplateFile) {
+        String templateName = null;
+        byte[] templateBytes;
         try {
-            ClassPathResource resource = new ClassPathResource("templates/" + templateName);
-            byte[] templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
+            if (htmlTemplateFile != null && htmlTemplateFile.exists()) {
+                templateBytes= Files.readAllBytes(htmlTemplateFile.toPath());
+            } else {
+                templateName = "welcome.html";
+                // Load HTML content from the template file in the resources/templates directory
+                ClassPathResource resource = new ClassPathResource("templates/" + templateName);
+                templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
+            }
+
             return new String(templateBytes, StandardCharsets.UTF_8);
         } catch (IOException e) {
             LOGGER.error("Error loading HTML template file: {}", templateName, e);
