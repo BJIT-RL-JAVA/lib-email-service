@@ -135,20 +135,8 @@ public class SendGridMailService implements MailService, MailValidation {
 
             return new String(templateBytes, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            log.error("Error loading HTML template file: {}", templateName, e);
+            LOGGER.error("Error loading HTML template file: {}", templateName, e);
             throw new RuntimeException("Error loading HTML template file", e);
         }
-    }
-    private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent)
-            throws MessagingException {
-        MimeMessage message = new MimeMessage(session);
-        setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
-        String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate());
-
-        // Inject dynamic content into the HTML template
-        //htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
-
-        message.setContent(htmlContent, "text/html");
-        return message;
     }
 }

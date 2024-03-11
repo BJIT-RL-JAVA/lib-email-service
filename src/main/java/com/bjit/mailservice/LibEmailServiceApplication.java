@@ -27,7 +27,7 @@ public class LibEmailServiceApplication {
         mailContent.setBody("Modular configuration");
         mailContent.setAttachments(
                 new ArrayList<>(Arrays.asList(
-                        new File("C:\\Users\\Bjit\\Desktop\\others\\sss.txt"))));
+                        new File("C:\\Users\\Bjit\\Desktop\\IMG_5380.JPG"))));
 
         mailSender.sendMail(mailContent);
 
