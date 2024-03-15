@@ -36,6 +36,11 @@ public class SendGridMailService implements MailService, MailValidation {
 
     private SendGrid sendGrid;
 
+    /**
+     * Constructs a SendGridMailService object with the provided SendGrid instance.
+     *
+     * @param sendGrid the SendGrid instance used for sending emails
+     */
     public SendGridMailService(SendGrid sendGrid) {
         this.sendGrid = sendGrid;
     }
@@ -64,6 +69,16 @@ public class SendGridMailService implements MailService, MailValidation {
         return mailSendUsingSendGrid(mailContent, mail);
     }
 
+    /**
+     * Sends an HTML template-based email using the SendGrid with the provided MailContent.
+     * If a specific HTML template is not provided in the MailContent, the default "welcome.html" template is loaded.
+     * The dynamic content specified in the MailContent is replaced in the template before sending the email.
+     *
+     * @param mailContent The MailContent object containing information about the email to be sent,
+     *                    including the HTML template and dynamic content.
+     * @return A unique message identifier for tracking the sent email.
+     * @throws MessagingException If an error occurs during the email sending process.
+     */
     @Override
     public String sendHtmlTemplateMail(MailContent mailContent) throws MessagingException {
         Mail mail = new Mail();

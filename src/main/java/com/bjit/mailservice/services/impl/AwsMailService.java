@@ -39,10 +39,23 @@ public class AwsMailService implements MailService, MailValidation {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsMailService.class);
     private final AmazonSimpleEmailService client;
 
+    /**
+     * Constructs an AwsMailService object with the provided Amazon Simple Email Service client.
+     *
+     * @param client the Amazon SES client used for sending emails
+     */
     public AwsMailService(AmazonSimpleEmailService client) {
         this.client = client;
     }
 
+    /**
+     * Sends an email using the Amazon Simple Email Service with the provided MailContent.
+     *
+     * @param mailContent The content of the email to be sent.
+     * @return A message indicating the result of the email sending operation.
+     * It could be a success message or an error message.
+     * @throws MessagingException If an error occurs during the email sending process.
+     */
     @Override
     public String sendMail(MailContent mailContent) throws MessagingException {
         Session session = Session.getDefaultInstance(new Properties());
@@ -62,6 +75,16 @@ public class AwsMailService implements MailService, MailValidation {
         return mailSend(mailContent.getBody(), mailContent, message);
     }
 
+    /**
+     * Sends an HTML template-based email using the Amazon Simple Email Service with the provided MailContent.
+     * If a specific HTML template is not provided in the MailContent, the default "welcome.html" template is loaded.
+     * The dynamic content specified in the MailContent is replaced in the template before sending the email.
+     *
+     * @param mailContent The MailContent object containing information about the email to be sent,
+     *                    including the HTML template and dynamic content.
+     * @return A unique message identifier for tracking the sent email.
+     * @throws MessagingException If an error occurs during the email sending process.
+     */
     @Override
     public String sendHtmlTemplateMail(MailContent mailContent) throws MessagingException {
         Session session = Session.getDefaultInstance(new Properties());

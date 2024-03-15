@@ -7,5 +7,10 @@ package com.bjit.mailservice.services;
  * @author Mallika Dey
  */
 public interface MailServiceFactory {
+    /**
+     * Creates and returns an instance of MailService.
+     *
+     * @return An MailService instance.
+     */
     MailService createMailService();
 }
