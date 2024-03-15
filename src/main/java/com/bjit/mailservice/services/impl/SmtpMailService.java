@@ -23,14 +23,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
-
 public class SmtpMailService implements MailService, MailValidation {
 
     private static final Logger log = LoggerFactory.getLogger(SmtpMailService.class);
@@ -98,16 +100,19 @@ public class SmtpMailService implements MailService, MailValidation {
         setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
         Multipart multipart = new MimeMultipart();
         addTextPart(multipart, mailContent.getBody());
-        try {
-            addAttachmentParts(multipart, mailContent.getAttachments());
-        } catch (EmailException e) {
-            throw new RuntimeException(e);
+        if(!mailContent.getAttachments().isEmpty())
+        {
+            try {
+                addAttachmentParts(multipart, mailContent.getAttachments());
+            } catch (EmailException e) {
+                throw new RuntimeException(e);
+            }
         }
         message.setContent(multipart);
         return message;
     }
-    private MimeMessage setEmailHeader(MimeMessage message, List<String> to,
-                                       List<String> cc, List<String> bcc, String subject) {
+    private void setEmailHeader(MimeMessage message, List<String> to,
+                                List<String> cc, List<String> bcc, String subject) {
         try {
             message.setRecipients(Message.RecipientType.TO,
                     createInternetAddresses(to));
@@ -120,7 +125,6 @@ public class SmtpMailService implements MailService, MailValidation {
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
-        return message;
     }
     private Address[] createInternetAddresses(List<String> addresses) throws AddressException {
         if (addresses == null) {
@@ -167,40 +171,80 @@ public class SmtpMailService implements MailService, MailValidation {
             throw new RuntimeException(e);
         }
     }
-
     @Override
     public void checkFileCompatibility(File file) {
         MailValidation.super.checkFileCompatibility(file);
     }
-    private String loadHtmlTemplate(File htmlTemplateFile) {
-        String templateName = null;
-        byte[] templateBytes;
+    /**
+     * Loads an HTML template file and processes it with dynamic content if provided otherwise it processes the default template
+     *
+     * @param htmlTemplateFile The file to be validated.
+     * @throws EmailException If the file fails size or type validation.
+     */
+    private String loadHtmlTemplate(File htmlTemplateFile, Map<String, Object> objectMap) {
         try {
-            if (htmlTemplateFile != null && htmlTemplateFile.exists()) {
-                templateBytes= Files.readAllBytes(htmlTemplateFile.toPath());
+            byte[] templateBytes;
+            if (htmlTemplateFile != null && htmlTemplateFile.exists() && !objectMap.isEmpty()) {
+                // Process HTML template with dynamic content
+                return processHtmlTemplate(htmlTemplateFile, objectMap);
+            } else if (htmlTemplateFile != null && htmlTemplateFile.exists()) {
+                // Load HTML content from the custom template file without dynamic content
+                templateBytes = Files.readAllBytes(htmlTemplateFile.toPath());
             } else {
-                templateName = "welcome.html";
+                // Load HTML content from the default template file
+                String templateName = "welcome.html";
                 // Load HTML content from the template file in the resources/templates directory
                 ClassPathResource resource = new ClassPathResource("templates/" + templateName);
                 templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
             }
-
             return new String(templateBytes, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            log.error("Error loading HTML template file: {}", templateName, e);
+        } catch (IOException  e) {
+            log.error("Error loading HTML template file", e);
             throw new RuntimeException("Error loading HTML template file", e);
         }
     }
-    private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent)
-            throws MessagingException {
+    private String processHtmlTemplate(File htmlTemplateFile, Map<String, Object> objectMap) {
+        try {
+            TemplateEngine templateEngine = new TemplateEngine();
+            String template = Files.readString(htmlTemplateFile.toPath(), StandardCharsets.UTF_8);
+            // Create Thymeleaf context and add objectMap as a variable
+            Context context = new Context();
+            context.setVariables(objectMap);
+            // Process the Thymeleaf template with dynamic values
+            return templateEngine.process(template, context);
+        } catch (IOException e) {
+            log.error("Error loading HTML template file", e);
+            throw new RuntimeException("Error loading HTML template file", e);
+        }
+    }
+    private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent) throws MessagingException {
         MimeMessage message = new MimeMessage(session);
         setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
-        String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate());
 
-        // Inject dynamic content into the HTML template
-        //htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
+        // Load HTML content from template and process with dynamic values
+        String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate(), mailContent.getObjectMap());
 
-        message.setContent(htmlContent, "text/html");
+        // Create a multipart to hold both HTML content and other parts (if any)
+        MimeMultipart multipart = new MimeMultipart();
+
+        // Create a MimeBodyPart for the HTML content
+        MimeBodyPart htmlPart = new MimeBodyPart();
+        htmlPart.setContent(htmlContent, "text/html");
+        addTextPart(multipart, mailContent.getBody());
+        multipart.addBodyPart(htmlPart);
+
+        // Add other parts (attachments, text, etc.) to the multipart
+        if (!mailContent.getAttachments().isEmpty()) {
+            try {
+                addAttachmentParts(multipart, mailContent.getAttachments());
+            } catch (EmailException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        // Set the multipart as the content of the MimeMessage
+        message.setContent(multipart);
+
         return message;
     }
 }

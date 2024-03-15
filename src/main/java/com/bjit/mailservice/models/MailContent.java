@@ -1,5 +1,6 @@
 package com.bjit.mailservice.models;
 
+import com.bjit.mailservice.services.MailValidation;
 import com.bjit.mailservice.utils.ValidAttachment;
 import com.bjit.mailservice.utils.ValidAttachmentSize;
 import jakarta.validation.constraints.Email;
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Represents the content of an email message.
@@ -22,7 +24,7 @@ import java.util.ArrayList;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MailContent {
+public class MailContent implements MailValidation {
     @Email
     private String from;
 
@@ -33,21 +35,16 @@ public class MailContent {
     private String subject;
     private String body;
     private File htmlTemplate;
+    private HashMap<String, Object> objectMap;
 
     @ValidAttachmentSize(groups = {Default.class, ValidAttachment.class})
     private ArrayList<File> attachments;
     // Custom setter for htmlTemplate with validation
     public void setHtmlTemplate(File htmlTemplate) {
-        if (htmlTemplate != null && htmlTemplate.isFile() && htmlTemplate.getName().endsWith(".html")) {
-            // Check file size
-            long fileSizeInBytes = htmlTemplate.length();
-            long fileSizeInMB = fileSizeInBytes / (1024 * 1024); // Convert bytes to MB
-            if (fileSizeInMB <= 5) {
-                this.htmlTemplate = htmlTemplate;
-            } else {
-                throw new IllegalArgumentException("File size exceeds the maximum limit of 5MB.");
-            }
-        } else {
+        if (validateHtmlTemplate(htmlTemplate)) {
+            this.htmlTemplate = htmlTemplate;
+        }
+        else {
             throw new IllegalArgumentException("Invalid File! Please provide an HTML file only.");
         }
     }

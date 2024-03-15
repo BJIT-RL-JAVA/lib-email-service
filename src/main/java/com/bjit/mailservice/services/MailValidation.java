@@ -35,4 +35,18 @@ public interface MailValidation {
             throw new RuntimeException("Unsupported file type: " + fileExtension + " - " + fileName);
         }
     }
+    default boolean validateHtmlTemplate(File htmlTemplate){
+        if (htmlTemplate != null && htmlTemplate.isFile() && htmlTemplate.getName().endsWith(".html")) {
+            // Check file size
+            long fileSizeInBytes = htmlTemplate.length();
+            long fileSizeInMB = fileSizeInBytes / (1024 * 1024); // Convert bytes to MB
+            if (fileSizeInMB <= 5) {
+                return true;
+            } else {
+                throw new IllegalArgumentException("File size exceeds the maximum limit of 5MB.");
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid File! Please provide an HTML file only.");
+        }
+    }
 }
