@@ -21,6 +21,13 @@ public class AWSFactory implements MailServiceFactory {
     private String secretKey;
     private String region;
 
+    /**
+     * Constructs an AWSFactory object with the provided AWS access key, secret key, and region.
+     *
+     * @param accessKey AWS access key associated with the AWS account
+     * @param secretKey AWS secret key associated with the AWS account
+     * @param region    AWS region where the factory will operate
+     */
     public AWSFactory(String accessKey, String secretKey, String region) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;

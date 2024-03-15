@@ -14,7 +14,7 @@ package com.bjit.mailservice.services.impl;
 import com.bjit.mailservice.exception.EmailException;
 import com.bjit.mailservice.models.MailContent;
 import com.bjit.mailservice.services.MailService;
-import com.bjit.mailservice.services.MailValidation;
+import com.bjit.mailservice.validators.MailValidation;
 import jakarta.activation.DataHandler;
 import jakarta.activation.FileDataSource;
 import jakarta.mail.*;
@@ -39,7 +39,7 @@ public class SmtpMailService implements MailService, MailValidation {
      *
      * @param mailContent The content of the email to be sent.
      * @return A message indicating the result of the email sending operation.
-     *         It could be a success message or an error message.
+     * It could be a success message or an error message.
      * @throws MessagingException If an error occurs during the email sending process.
      */
     @Override
@@ -50,12 +50,20 @@ public class SmtpMailService implements MailService, MailValidation {
             MimeMessage message = createMimeMessage(session, mailContent);
             Transport.send(message);
             return "Mail has been sent successfully.";
-        } catch (MessagingException e) {
+        } catch (MessagingException | EmailException e) {
             log.error("Error sending email", e);
             throw e;
         }
     }
 
+    /**
+     * Sends an HTML templated email with the specified mail content.
+     *
+     * @param mailContent The content of the email to be sent.
+     * @return A message indicating the result of the email sending operation.
+     * It could be a success message or an error message.
+     * @throws MessagingException If an error occurs during the email sending process.
+     */
     @Override
     public String sendHtmlTemplateMail(MailContent mailContent) throws MessagingException {
         try {
@@ -68,6 +76,7 @@ public class SmtpMailService implements MailService, MailValidation {
             throw e;
         }
     }
+
     private Session createSmtpSession() {
         Properties properties = new Properties();
         properties.put("mail.smtp.auth", true);
@@ -83,11 +92,12 @@ public class SmtpMailService implements MailService, MailValidation {
             }
         });
     }
+
     /**
      * Creates a MimeMessage for the specified mail content.
      *
-     * @param session      The SMTP session.
-     * @param mailContent  The content of the email.
+     * @param session     The SMTP session.
+     * @param mailContent The content of the email.
      * @return A MimeMessage ready to be sent.
      * @throws MessagingException If an error occurs during message creation.
      */
@@ -100,11 +110,12 @@ public class SmtpMailService implements MailService, MailValidation {
         try {
             addAttachmentParts(multipart, mailContent.getAttachments());
         } catch (EmailException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
         message.setContent(multipart);
         return message;
     }
+
     private MimeMessage setEmailHeader(MimeMessage message, List<String> to,
                                        List<String> cc, List<String> bcc, String subject) {
         try {
@@ -121,6 +132,7 @@ public class SmtpMailService implements MailService, MailValidation {
         }
         return message;
     }
+
     private Address[] createInternetAddresses(List<String> addresses) throws AddressException {
         if (addresses == null) {
             return new Address[0]; // Return an empty array if the addresses list is null
@@ -132,6 +144,7 @@ public class SmtpMailService implements MailService, MailValidation {
         }
         return internetAddresses;
     }
+
     /**
      * Adds a text part to the specified multipart content.
      *
@@ -152,7 +165,7 @@ public class SmtpMailService implements MailService, MailValidation {
      * @param attachments The file to be validated.
      * @throws EmailException If the file fails size or type validation.
      */
-    private void addAttachmentParts(Multipart multipart, List<File> attachments) throws EmailException {
+    private void addAttachmentParts(Multipart multipart, List<File> attachments) {
         try {
             for (File file : attachments) {
                 checkFileCompatibility(file);
@@ -162,18 +175,14 @@ public class SmtpMailService implements MailService, MailValidation {
                 filePart.setFileName(file.getName());
                 multipart.addBodyPart(filePart);
             }
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
+        } catch (MessagingException | IOException e) {
+            log.error("Error sending email content", e);
+            throw new EmailException(e.getMessage());
         }
     }
 
-    @Override
-    public void checkFileCompatibility(File file) {
-        MailValidation.super.checkFileCompatibility(file);
-    }
     private String loadHtmlTemplate(String templateName) {
         try {
-            // Load HTML content from the template file in the resources/templates directory
             ClassPathResource resource = new ClassPathResource("templates/" + templateName);
             byte[] templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
             return new String(templateBytes, StandardCharsets.UTF_8);
@@ -182,6 +191,7 @@ public class SmtpMailService implements MailService, MailValidation {
             throw new RuntimeException("Error loading HTML template file", e);
         }
     }
+
     private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent)
             throws MessagingException {
         MimeMessage message = new MimeMessage(session);
@@ -191,11 +201,9 @@ public class SmtpMailService implements MailService, MailValidation {
         if (mailContent.getHtmlTemplate() != null && !mailContent.getHtmlTemplate().isEmpty()) {
             htmlContent = mailContent.getHtmlTemplate();
         } else {
-            // Load default HTML template if custom template is not provided
             htmlContent = loadHtmlTemplate("welcome.html");
         }
 
-        // Inject dynamic content into the HTML template
         htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
 
         message.setContent(htmlContent, "text/html");

@@ -3,6 +3,7 @@ package com.bjit.mailservice.services.impl;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.bjit.mailservice.models.MailContent;
 import com.bjit.mailservice.services.MailService;
+import com.bjit.mailservice.validators.MailValidation;
 import jakarta.mail.MessagingException;
 
 import java.io.ByteArrayOutputStream;
@@ -12,13 +13,10 @@ import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 import com.amazonaws.services.simpleemail.model.RawMessage;
 import com.amazonaws.services.simpleemail.model.SendRawEmailRequest;
-import com.bjit.mailservice.services.MailValidation;
 import jakarta.activation.DataHandler;
 import jakarta.activation.FileDataSource;
 import jakarta.mail.Message;
@@ -41,10 +39,23 @@ public class AwsMailService implements MailService, MailValidation {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsMailService.class);
     private final AmazonSimpleEmailService client;
 
+    /**
+     * Constructs an AwsMailService object with the provided Amazon Simple Email Service client.
+     *
+     * @param client the Amazon SES client used for sending emails
+     */
     public AwsMailService(AmazonSimpleEmailService client) {
         this.client = client;
     }
 
+    /**
+     * Sends an email using the Amazon Simple Email Service with the provided MailContent.
+     *
+     * @param mailContent The content of the email to be sent.
+     * @return A message indicating the result of the email sending operation.
+     * It could be a success message or an error message.
+     * @throws MessagingException If an error occurs during the email sending process.
+     */
     @Override
     public String sendMail(MailContent mailContent) throws MessagingException {
         Session session = Session.getDefaultInstance(new Properties());
@@ -61,10 +72,19 @@ public class AwsMailService implements MailService, MailValidation {
 
         MimeBodyPart htmlPart = new MimeBodyPart();
 
-        mailSend(mailContent.getBody(), mailContent, message);
-        return "mail sent successfully";
+        return mailSend(mailContent.getBody(), mailContent, message);
     }
 
+    /**
+     * Sends an HTML template-based email using the Amazon Simple Email Service with the provided MailContent.
+     * If a specific HTML template is not provided in the MailContent, the default "welcome.html" template is loaded.
+     * The dynamic content specified in the MailContent is replaced in the template before sending the email.
+     *
+     * @param mailContent The MailContent object containing information about the email to be sent,
+     *                    including the HTML template and dynamic content.
+     * @return A unique message identifier for tracking the sent email.
+     * @throws MessagingException If an error occurs during the email sending process.
+     */
     @Override
     public String sendHtmlTemplateMail(MailContent mailContent) throws MessagingException {
         Session session = Session.getDefaultInstance(new Properties());
@@ -74,8 +94,7 @@ public class AwsMailService implements MailService, MailValidation {
                 loadHtmlTemplate("welcome.html") : mailContent.getHtmlTemplate();
 
         htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
-        mailSend(htmlContent, mailContent, message);
-        return "mail sent successfully";
+        return mailSend(htmlContent, mailContent, message);
     }
 
     private MimeMessage generateMimeMessage(MailContent mailContent,
@@ -112,8 +131,8 @@ public class AwsMailService implements MailService, MailValidation {
         message.setRecipients(type, addressTo.toArray(new InternetAddress[0]));
     }
 
-    private void mailSend(String htmlContent, MailContent mailContent
-            , MimeMessage message) {
+    private String mailSend(String htmlContent, MailContent mailContent
+            , MimeMessage message) throws MessagingException {
         try {
             MimeBodyPart htmlPart = new MimeBodyPart();
 
@@ -144,11 +163,11 @@ public class AwsMailService implements MailService, MailValidation {
 
             client.sendRawEmail(new SendRawEmailRequest(
                     new RawMessage(ByteBuffer.wrap(outputStream.toByteArray()))));
-        } catch (MessagingException ex) {
-            LOGGER.error("Error sending email", ex);
         } catch (IOException ex) {
             LOGGER.error("Error sending email content", ex);
+            return "mail sending failed";
         }
+        return "mail sent successfully";
     }
 
     private String loadHtmlTemplate(String templateName) {
