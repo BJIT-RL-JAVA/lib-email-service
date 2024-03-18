@@ -25,9 +25,9 @@ public class LibEmailServiceApplication {
         mailContent.setCc(new ArrayList<>(Arrays.asList("khalidhasan374@gmail.com", "connectkhalid404@gmail.com")));
         mailContent.setSubject("Testing mail from deployed maven package");
         mailContent.setBody("Modular configuration");
-        mailContent.setAttachments(
-                new ArrayList<>(Arrays.asList(
-                        new File("C:\\Users\\Bjit\\Desktop\\Md Reaz Uddin(60199).pdf"))));
+//        mailContent.setAttachments(
+//                new ArrayList<>(Arrays.asList(
+//                        new File("C:\\Users\\Bjit\\Desktop\\Md Reaz Uddin(60199).pdf"))));
         // Assuming File object representing the HTML template file, named htmlTemplateFile
         File htmlTemplateFile = new File("C:\\Users\\Bjit\\Desktop\\MailTemplate.html");
 
