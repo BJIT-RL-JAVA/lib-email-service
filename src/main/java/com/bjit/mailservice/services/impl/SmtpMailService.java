@@ -22,6 +22,7 @@ import jakarta.mail.internet.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -234,7 +235,7 @@ public class SmtpMailService implements MailService, MailValidation {
         multipart.addBodyPart(htmlPart);
 
         // Add other parts (attachments, text, etc.) to the multipart
-        if (!mailContent.getAttachments().isEmpty()) {
+        if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
             try {
                 addAttachmentParts(multipart, mailContent.getAttachments());
             } catch (EmailException e) {
