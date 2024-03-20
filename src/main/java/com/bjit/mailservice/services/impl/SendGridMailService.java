@@ -46,7 +46,7 @@ public class SendGridMailService implements MailService, MailValidation {
     }
 
     /**
-     * Sends an email with the specified mail content.
+     * Sends an email using SendGrid with the specified mail content.
      *
      * @param mailContent The content of the email to be sent.
      * @return A message indicating the result of the email sending operation.

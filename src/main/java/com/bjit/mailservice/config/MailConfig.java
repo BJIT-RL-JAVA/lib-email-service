@@ -1,5 +1,6 @@
 package com.bjit.mailservice.config;
 
+import com.bjit.mailservice.exception.EmailException;
 import com.bjit.mailservice.models.MailServiceType;
 import com.bjit.mailservice.services.MailSender;
 import com.bjit.mailservice.services.MailServiceFactory;
@@ -32,7 +33,7 @@ public class MailConfig {
      *
      * @param mailServiceType The type of mail service to use (e.g., "sendgrid" or "aws")
      * @return MailServiceFactory instance for the specified mail service type
-     * @throws IllegalArgumentException if an invalid mail service type is provided
+     * @throws EmailException if an invalid mail service type is provided
      */
     @Bean
     public MailServiceFactory mailServiceFactory(@Value("${mail.service.type}") String mailServiceType) {
@@ -43,7 +44,7 @@ public class MailConfig {
         else if (MailServiceType.SMTP.getValue().equals(mailServiceType.toUpperCase()))
             return new SmtpFactory();
 
-        throw new IllegalArgumentException("Invalid mail service type: " + mailServiceType);
+        throw new EmailException("Invalid mail service type: " + mailServiceType);
     }
 
     /**
