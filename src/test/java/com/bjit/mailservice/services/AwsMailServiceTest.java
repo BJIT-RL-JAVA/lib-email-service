@@ -40,7 +40,8 @@ public class AwsMailServiceTest {
     @Test
     public void sendMailUsingAWSSESShouldExecuteSuccessfully() throws MessagingException {
         mailContent.setAttachments(new ArrayList<>(
-                List.of(new File("C:\\Users\\Bjit\\Desktop\\others\\sss.txt"))));
+                List.of(new File("E:\\Mallika Dey\\materials\\others\\sss.txt"))));
+
         when(amazonSimpleEmailService.sendRawEmail(any(SendRawEmailRequest.class)))
                 .thenReturn(new SendRawEmailResult());
 

@@ -83,7 +83,7 @@ public class SendGridMailServiceTest {
         mailContent.setSubject("Testing aws ses mail service");
         mailContent.setBody("testing aws ses using mockito");
         mailContent.setAttachments(new ArrayList<>(List.of(
-                new File("C:\\Users\\Bjit\\Desktop\\others\\sss.txt"))));
+                new File("E:\\Mallika Dey\\materials\\others\\sss.txt"))));
 
         return mailContent;
     }

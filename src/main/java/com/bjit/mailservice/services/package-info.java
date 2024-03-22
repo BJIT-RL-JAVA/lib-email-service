@@ -1,3 +1,4 @@
+package com.bjit.mailservice.services;
 /**
  * Provides services for sending emails.
  * This package contains implementations for email sending functionality,
@@ -22,4 +23,3 @@
  *
  * @since 1.0
  */
-package com.bjit.mailservice.services;

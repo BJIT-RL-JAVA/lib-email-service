@@ -4,6 +4,9 @@ import jakarta.mail.MessagingException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * @hidden
+ */
 @SpringBootApplication
 public class LibEmailServiceApplication {
 

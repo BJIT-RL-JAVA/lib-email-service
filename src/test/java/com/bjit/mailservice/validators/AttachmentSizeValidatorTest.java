@@ -35,14 +35,14 @@ public class AttachmentSizeValidatorTest {
     @Test
     public void fileSizeMoreThan25MBShouldReturnFalse() {
         ArrayList<File> files = new ArrayList<>(List.of(
-                new File("C:\\Users\\Bjit\\Downloads\\Git-2.43.0-64-bit.exe")));
+                new File("E:\\Mallika Dey\\downloads\\jdk-17.0.10_windows-x64_bin.exe")));
         assertFalse(attachmentSizeValidator.isValid(files, constraintValidatorContext));
     }
 
     @Test
     public void ListOfFileIsLessThan25MBShouldReturnTrue() {
         ArrayList<File> files = new ArrayList<>(List.of(
-                new File("C:\\Users\\Bjit\\Desktop\\others\\sss.txt")));
+                new File("E:\\Mallika Dey\\materials\\others\\sss.txt")));
         assertTrue(attachmentSizeValidator.isValid(files, constraintValidatorContext));
     }
 

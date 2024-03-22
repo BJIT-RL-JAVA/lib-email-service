@@ -31,7 +31,7 @@ public class MailValidationTest {
 
     @Test
     public void checkFileCompatibilityTest_InvalidFileType_ShouldThrowException() {
-        File file = new File("C:\\Users\\Bjit\\Downloads\\Git-2.43.0-64-bit.exe");
+        File file = new File("E:\\Mallika Dey\\downloads\\jdk-17.0.10_windows-x64_bin.exe");
 
         assertThrows(RuntimeException.class, () -> mailValidation.checkFileCompatibility(file));
     }

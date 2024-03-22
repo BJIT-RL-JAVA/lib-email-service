@@ -30,7 +30,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
 
 /**
- * Implementation of the MailService interface for sending emails using AWS SES (Simple Email Service).
+ * Implementation of the MailService interface for sending emails using AWS SES.
  * This class handles the integration with AWS SES and provides the logic for sending email messages.
  *
  * @author Mallika Dey
@@ -76,7 +76,7 @@ public class AwsMailService implements MailService, MailValidation {
     }
 
     /**
-     * Sends an HTML template-based email using the Amazon Simple Email Service with the provided MailContent.
+     * Sends an HTML template-based email using the AWS SES with the provided MailContent.
      * If a specific HTML template is not provided in the MailContent, the default "welcome.html" template is loaded.
      * The dynamic content specified in the MailContent is replaced in the template before sending the email.
      *

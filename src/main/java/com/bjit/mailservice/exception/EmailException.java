@@ -1,5 +1,5 @@
 /**
- * Created by BJIT|| BJIT-R&D
+ * @author Khalid
  * Date: 1/25/2024
  * Time: 4:06 PM
  * Project Name: lib-email-service

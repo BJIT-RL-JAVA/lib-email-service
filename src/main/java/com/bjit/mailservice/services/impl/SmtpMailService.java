@@ -1,14 +1,3 @@
-/**
- * SmtpMailService is an implementation of the MailService interface that sends emails using the SMTP protocol.
- * It provides methods for sending emails with text content and attachments.
- *
- * @author Khalid|| BJIT-R&D
- * @since: 1/26/2024
- * Time: 3:38 PM
- * Project Name: lib-email-service
- * @version 1.0
- */
-
 package com.bjit.mailservice.services.impl;
 
 import com.bjit.mailservice.exception.EmailException;
@@ -30,6 +19,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
 
+/**
+ * SmtpMailService is an implementation of the MailService interface that sends emails using the SMTP protocol.
+ * It provides methods for sending emails with text content and attachments.
+ *
+ * @author Khalid
+ * @version 1.0
+ * Time: 3:38 PM
+ * Project Name: lib-email-service
+ */
 public class SmtpMailService implements MailService, MailValidation {
 
     private static final Logger log = LoggerFactory.getLogger(SmtpMailService.class);
@@ -45,7 +43,6 @@ public class SmtpMailService implements MailService, MailValidation {
     @Override
     public String sendMail(MailContent mailContent) throws MessagingException {
         try {
-
             Session session = createSmtpSession();
             MimeMessage message = createMimeMessage(session, mailContent);
             Transport.send(message);
@@ -57,7 +54,7 @@ public class SmtpMailService implements MailService, MailValidation {
     }
 
     /**
-     * Sends an HTML templated email with the specified mail content.
+     * Sends an HTML templated email using SMTP with the specified mail content.
      *
      * @param mailContent The content of the email to be sent.
      * @return A message indicating the result of the email sending operation.
@@ -107,11 +104,7 @@ public class SmtpMailService implements MailService, MailValidation {
         setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
         Multipart multipart = new MimeMultipart();
         addTextPart(multipart, mailContent.getBody());
-        try {
-            addAttachmentParts(multipart, mailContent.getAttachments());
-        } catch (EmailException e) {
-            throw e;
-        }
+        addAttachmentParts(multipart, mailContent.getAttachments());
         message.setContent(multipart);
         return message;
     }

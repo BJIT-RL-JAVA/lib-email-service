@@ -36,7 +36,7 @@ public class SMTPMailServiceTest {
         when(mailContent.getBcc()).thenReturn(new ArrayList<>(List.of("abc2@gmail.com")));
         when(mailContent.getAttachments())
                 .thenReturn(new ArrayList<>(
-                        List.of(new File("C:\\Users\\Bjit\\Desktop\\others\\sss.txt"))));
+                        List.of(new File("E:\\Mallika Dey\\materials\\others\\sss.txt"))));
 
         String result = smtpMailService.sendMail(mailContent);
 

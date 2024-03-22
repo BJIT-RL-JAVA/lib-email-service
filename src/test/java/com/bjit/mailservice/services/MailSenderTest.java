@@ -72,7 +72,7 @@ public class MailSenderTest {
         mailContent.setBody("testing aws ses using mockito");
         mailContent.setAttachments(
                 new ArrayList<>(Arrays.asList(
-                        new File("C:\\Users\\BJIT\\Downloads\\home.jpeg"))));
+                        new File("E:\\Mallika Dey\\materials\\others\\sss.txt"))));
 
         return mailContent;
     }
