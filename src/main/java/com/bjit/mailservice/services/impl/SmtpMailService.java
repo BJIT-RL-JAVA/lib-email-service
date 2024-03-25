@@ -13,6 +13,7 @@ package com.bjit.mailservice.services.impl;
 
 import com.bjit.mailservice.exception.EmailException;
 import com.bjit.mailservice.models.MailContent;
+import com.bjit.mailservice.services.LoadMailTemplate;
 import com.bjit.mailservice.services.MailService;
 import com.bjit.mailservice.services.MailValidation;
 import jakarta.activation.DataHandler;
@@ -21,20 +22,13 @@ import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StreamUtils;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-public class SmtpMailService implements MailService, MailValidation {
+
+public class SmtpMailService implements MailService, MailValidation, LoadMailTemplate {
 
     private static final Logger log = LoggerFactory.getLogger(SmtpMailService.class);
 
@@ -43,7 +37,7 @@ public class SmtpMailService implements MailService, MailValidation {
      *
      * @param mailContent The content of the email to be sent.
      * @return A message indicating the result of the email sending operation.
-     *         It could be a success message or an error message.
+     * It could be a success message or an error message.
      * @throws MessagingException If an error occurs during the email sending process.
      */
     @Override
@@ -72,6 +66,7 @@ public class SmtpMailService implements MailService, MailValidation {
             throw e;
         }
     }
+
     private Session createSmtpSession() {
         Properties properties = new Properties();
         properties.put("mail.smtp.auth", true);
@@ -87,11 +82,12 @@ public class SmtpMailService implements MailService, MailValidation {
             }
         });
     }
+
     /**
      * Creates a MimeMessage for the specified mail content.
      *
-     * @param session      The SMTP session.
-     * @param mailContent  The content of the email.
+     * @param session     The SMTP session.
+     * @param mailContent The content of the email.
      * @return A MimeMessage ready to be sent.
      * @throws MessagingException If an error occurs during message creation.
      */
@@ -101,8 +97,7 @@ public class SmtpMailService implements MailService, MailValidation {
         setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
         Multipart multipart = new MimeMultipart();
         addTextPart(multipart, mailContent.getBody());
-        if(!mailContent.getAttachments().isEmpty())
-        {
+        if (!mailContent.getAttachments().isEmpty()) {
             try {
                 addAttachmentParts(multipart, mailContent.getAttachments());
             } catch (EmailException e) {
@@ -112,6 +107,7 @@ public class SmtpMailService implements MailService, MailValidation {
         message.setContent(multipart);
         return message;
     }
+
     private void setEmailHeader(MimeMessage message, List<String> to,
                                 List<String> cc, List<String> bcc, String subject) {
         try {
@@ -127,6 +123,7 @@ public class SmtpMailService implements MailService, MailValidation {
             throw new RuntimeException(e);
         }
     }
+
     private Address[] createInternetAddresses(List<String> addresses) throws AddressException {
         if (addresses == null) {
             return new Address[0]; // Return an empty array if the addresses list is null
@@ -138,6 +135,7 @@ public class SmtpMailService implements MailService, MailValidation {
         }
         return internetAddresses;
     }
+
     /**
      * Adds a text part to the specified multipart content.
      *
@@ -172,52 +170,12 @@ public class SmtpMailService implements MailService, MailValidation {
             throw new RuntimeException(e);
         }
     }
+
     @Override
     public void checkFileCompatibility(File file) {
         MailValidation.super.checkFileCompatibility(file);
     }
-    /**
-     * Loads an HTML template file and processes it with dynamic content if provided otherwise it processes the default template
-     *
-     * @param htmlTemplateFile The file to be validated.
-     * @throws EmailException If the file fails size or type validation.
-     */
-    private String loadHtmlTemplate(File htmlTemplateFile, Map<String, Object> objectMap) {
-        try {
-            byte[] templateBytes;
-            if (htmlTemplateFile != null && htmlTemplateFile.exists() && !objectMap.isEmpty()) {
-                // Process HTML template with dynamic content
-                return processHtmlTemplate(htmlTemplateFile, objectMap);
-            } else if (htmlTemplateFile != null && htmlTemplateFile.exists()) {
-                // Load HTML content from the custom template file without dynamic content
-                templateBytes = Files.readAllBytes(htmlTemplateFile.toPath());
-            } else {
-                // Load HTML content from the default template file
-                String templateName = "welcome.html";
-                // Load HTML content from the template file in the resources/templates directory
-                ClassPathResource resource = new ClassPathResource("templates/" + templateName);
-                templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
-            }
-            return new String(templateBytes, StandardCharsets.UTF_8);
-        } catch (IOException  e) {
-            log.error("Error loading HTML template file", e);
-            throw new RuntimeException("Error loading HTML template file", e);
-        }
-    }
-    private String processHtmlTemplate(File htmlTemplateFile, Map<String, Object> objectMap) {
-        try {
-            TemplateEngine templateEngine = new TemplateEngine();
-            String template = Files.readString(htmlTemplateFile.toPath(), StandardCharsets.UTF_8);
-            // Create Thymeleaf context and add objectMap as a variable
-            Context context = new Context();
-            context.setVariables(objectMap);
-            // Process the Thymeleaf template with dynamic values
-            return templateEngine.process(template, context);
-        } catch (IOException e) {
-            log.error("Error loading HTML template file", e);
-            throw new RuntimeException("Error loading HTML template file", e);
-        }
-    }
+
     private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent) throws MessagingException {
         MimeMessage message = new MimeMessage(session);
         setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
@@ -242,10 +200,8 @@ public class SmtpMailService implements MailService, MailValidation {
                 throw new RuntimeException(e);
             }
         }
-
         // Set the multipart as the content of the MimeMessage
         message.setContent(multipart);
-
         return message;
     }
 }

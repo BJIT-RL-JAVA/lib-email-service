@@ -1,5 +1,6 @@
 package com.bjit.mailservice.services.impl;
 
+import com.bjit.mailservice.services.LoadMailTemplate;
 import com.bjit.mailservice.services.MailService;
 import com.bjit.mailservice.services.MailValidation;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ import java.util.Base64;
  *
  * @author Mallika Dey
  */
-public class SendGridMailService implements MailService, MailValidation {
+public class SendGridMailService implements MailService, MailValidation, LoadMailTemplate {
     private static final Logger LOGGER = LoggerFactory.getLogger(SendGridMailService.class);
 
     private SendGrid sendGrid;
@@ -75,9 +76,8 @@ public class SendGridMailService implements MailService, MailValidation {
             personalization.addTo(new Email(toEmail));
         }
 
-        String htmlContent = loadHtmlTemplate( mailContent.getHtmlTemplate());
+        String htmlContent = loadHtmlTemplate( mailContent.getHtmlTemplate(), mailContent.getObjectMap());
 
-        htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
         mail.addPersonalization(personalization);
         mail.setSubject(mailContent.getSubject());
         mail.addContent(new Content("text/plain", mailContent.getBody()));
@@ -98,7 +98,7 @@ public class SendGridMailService implements MailService, MailValidation {
                     sendGridAttachment.setFilename(attachment.getName());
                     mail.addAttachments(sendGridAttachment);
                 } catch (IOException ex) {
-                    LOGGER.error("IO exception occured ", ex);
+                    LOGGER.error("IO exception occurred ", ex);
                 }
             }
         }
@@ -114,29 +114,9 @@ public class SendGridMailService implements MailService, MailValidation {
             LOGGER.error("IO exception occur in request ", ex);
         }
     }
-
     @Override
     public void checkFileCompatibility(File file) {
         MailValidation.super.checkFileCompatibility(file);
     }
 
-    private String loadHtmlTemplate(File htmlTemplateFile) {
-        String templateName = null;
-        byte[] templateBytes;
-        try {
-            if (htmlTemplateFile != null && htmlTemplateFile.exists()) {
-                templateBytes= Files.readAllBytes(htmlTemplateFile.toPath());
-            } else {
-                templateName = "welcome.html";
-                // Load HTML content from the template file in the resources/templates directory
-                ClassPathResource resource = new ClassPathResource("templates/" + templateName);
-                templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
-            }
-
-            return new String(templateBytes, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            LOGGER.error("Error loading HTML template file: {}", templateName, e);
-            throw new RuntimeException("Error loading HTML template file", e);
-        }
-    }
 }

@@ -2,6 +2,7 @@ package com.bjit.mailservice.services.impl;
 
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.bjit.mailservice.models.MailContent;
+import com.bjit.mailservice.services.LoadMailTemplate;
 import com.bjit.mailservice.services.MailService;
 import jakarta.mail.MessagingException;
 
@@ -38,7 +39,7 @@ import org.springframework.util.StreamUtils;
  *
  * @author Mallika Dey
  */
-public class AwsMailService implements MailService, MailValidation {
+public class AwsMailService implements MailService, MailValidation, LoadMailTemplate {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsMailService.class);
     private final AmazonSimpleEmailService client;
 
@@ -71,9 +72,7 @@ public class AwsMailService implements MailService, MailValidation {
         Session session = Session.getDefaultInstance(new Properties());
 
         MimeMessage message = generateMimeMessage(mailContent, session);
-        String htmlContent = loadHtmlTemplate( mailContent.getHtmlTemplate());
-
-        htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
+        String htmlContent = loadHtmlTemplate( mailContent.getHtmlTemplate(), mailContent.getObjectMap());
         mailSend(htmlContent, mailContent, message);
         return "mail sent successfully";
     }
@@ -148,26 +147,6 @@ public class AwsMailService implements MailService, MailValidation {
             LOGGER.error("Error sending email", ex);
         } catch (IOException ex) {
             LOGGER.error("Error sending email content", ex);
-        }
-    }
-
-    private String loadHtmlTemplate(File htmlTemplateFile) {
-        String templateName = null;
-        byte[] templateBytes;
-        try {
-            if (htmlTemplateFile != null && htmlTemplateFile.exists()) {
-                templateBytes= Files.readAllBytes(htmlTemplateFile.toPath());
-            } else {
-                templateName = "welcome.html";
-                // Load HTML content from the template file in the resources/templates directory
-                ClassPathResource resource = new ClassPathResource("templates/" + templateName);
-                templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
-            }
-
-            return new String(templateBytes, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            LOGGER.error("Error loading HTML template file: {}", templateName, e);
-            throw new RuntimeException("Error loading HTML template file", e);
         }
     }
 }
