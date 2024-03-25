@@ -1,8 +1,7 @@
 package com.bjit.mailservice.models;
 
-import com.bjit.mailservice.services.MailValidation;
-import com.bjit.mailservice.utils.ValidAttachment;
-import com.bjit.mailservice.utils.ValidAttachmentSize;
+
+import com.bjit.mailservice.validators.ValidAttachmentSize;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -24,7 +23,7 @@ import java.util.HashMap;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MailContent implements MailValidation {
+public class MailContent {
     @Email
     private String from;
 
@@ -37,15 +36,6 @@ public class MailContent implements MailValidation {
     private File htmlTemplate;
     private HashMap<String, Object> objectMap;
 
-    @ValidAttachmentSize(groups = {Default.class, ValidAttachment.class})
+    @ValidAttachmentSize(groups = {Default.class})
     private ArrayList<File> attachments;
-    // Custom setter for htmlTemplate with validation
-    public void setHtmlTemplate(File htmlTemplate) {
-        if (validateHtmlTemplate(htmlTemplate)) {
-            this.htmlTemplate = htmlTemplate;
-        }
-        else {
-            throw new IllegalArgumentException("Invalid File! Please provide an HTML file only.");
-        }
-    }
 }

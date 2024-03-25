@@ -2,7 +2,7 @@ package com.bjit.mailservice.services.impl;
 
 import com.bjit.mailservice.services.LoadMailTemplate;
 import com.bjit.mailservice.services.MailService;
-import com.bjit.mailservice.services.MailValidation;
+import com.bjit.mailservice.validators.MailValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -37,6 +37,11 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
 
     private SendGrid sendGrid;
 
+    /**
+     * Constructs a SendGridMailService object with the provided SendGrid instance.
+     *
+     * @param sendGrid the SendGrid instance used for sending emails
+     */
     public SendGridMailService(SendGrid sendGrid) {
         this.sendGrid = sendGrid;
     }
@@ -62,10 +67,19 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
         mail.setSubject(mailContent.getSubject());
         mail.addContent(new Content("text/plain", mailContent.getBody()));
 
-        mailSendUsingSendGrid(mailContent, mail);
-        return "mail sent successfully";
+        return mailSendUsingSendGrid(mailContent, mail);
     }
 
+    /**
+     * Sends an HTML template-based email using the SendGrid with the provided MailContent.
+     * If a specific HTML template is not provided in the MailContent, the default "welcome.html" template is loaded.
+     * The dynamic content specified in the MailContent is replaced in the template before sending the email.
+     *
+     * @param mailContent The MailContent object containing information about the email to be sent,
+     *                    including the HTML template and dynamic content.
+     * @return A unique message identifier for tracking the sent email.
+     * @throws MessagingException If an error occurs during the email sending process.
+     */
     @Override
     public String sendHtmlTemplateMail(MailContent mailContent) throws MessagingException {
         Mail mail = new Mail();
@@ -76,29 +90,34 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
             personalization.addTo(new Email(toEmail));
         }
 
-        String htmlContent = loadHtmlTemplate( mailContent.getHtmlTemplate(), mailContent.getObjectMap());
+        if (!validateHtmlTemplate(mailContent.getHtmlTemplate())) {
+            throw new IllegalArgumentException("Invalid File! Please provide an HTML file only.");
+        }
+
+        String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate(), mailContent.getObjectMap());
 
         mail.addPersonalization(personalization);
         mail.setSubject(mailContent.getSubject());
         mail.addContent(new Content("text/plain", mailContent.getBody()));
         mail.addContent(new Content("text/html", htmlContent));
 
-        mailSendUsingSendGrid(mailContent, mail);
-        return "mail sent successfully";
+        return mailSendUsingSendGrid(mailContent, mail);
     }
 
-    private void mailSendUsingSendGrid(MailContent mailContent, Mail mail) {
+    private String mailSendUsingSendGrid(MailContent mailContent, Mail mail) {
         if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
             for (File attachment : mailContent.getAttachments()) {
 
                 try {
+                    checkFileCompatibility(attachment);
                     byte[] fileContent = Files.readAllBytes(attachment.toPath());
                     Attachments sendGridAttachment = new Attachments();
                     sendGridAttachment.setContent(new String(Base64.getEncoder().encode(fileContent)));
                     sendGridAttachment.setFilename(attachment.getName());
                     mail.addAttachments(sendGridAttachment);
                 } catch (IOException ex) {
-                    LOGGER.error("IO exception occurred ", ex);
+                    LOGGER.error("IO exception occured ", ex);
+                    return "mail sending failed";
                 }
             }
         }
@@ -112,11 +131,9 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
             LOGGER.info("Calling sendgrid api {} {}", response.getStatusCode(), response.getBody());
         } catch (IOException ex) {
             LOGGER.error("IO exception occur in request ", ex);
+            return "mail sending failed";
         }
-    }
-    @Override
-    public void checkFileCompatibility(File file) {
-        MailValidation.super.checkFileCompatibility(file);
+        return "mail sent successfully";
     }
 
 }

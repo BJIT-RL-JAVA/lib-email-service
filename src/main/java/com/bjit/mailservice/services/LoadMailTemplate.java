@@ -46,6 +46,7 @@ public interface LoadMailTemplate {
             throw new RuntimeException("Error loading HTML template file", e);
         }
     }
+
     private String processHtmlTemplate(File htmlTemplateFile, Map<String, Object> objectMap) {
         try {
             TemplateEngine templateEngine = new TemplateEngine();

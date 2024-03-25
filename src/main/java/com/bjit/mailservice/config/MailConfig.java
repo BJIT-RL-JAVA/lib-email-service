@@ -1,5 +1,6 @@
 package com.bjit.mailservice.config;
 
+import com.bjit.mailservice.models.MailServiceType;
 import com.bjit.mailservice.services.MailSender;
 import com.bjit.mailservice.services.MailServiceFactory;
 import com.bjit.mailservice.services.impl.AWSFactory;
@@ -14,16 +15,16 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class MailConfig {
-    @Value("${cloud.aws.credentials.accessKey}")
+    @Value("${cloud.aws.credentials.accessKey:}")
     private String accessKey;
 
-    @Value("${cloud.aws.credentials.secretKey}")
+    @Value("${cloud.aws.credentials.secretKey:}")
     private String secretKey;
 
-    @Value("${cloud.aws.region.static}")
+    @Value("${cloud.aws.region.static:}")
     private String region;
 
-    @Value("${sendgrid.api.key}")
+    @Value("${sendgrid.api.key:}")
     private String sendGridApiKey;
 
     /**
@@ -35,11 +36,11 @@ public class MailConfig {
      */
     @Bean
     public MailServiceFactory mailServiceFactory(@Value("${mail.service.type}") String mailServiceType) {
-        if (mailServiceType.equalsIgnoreCase("sendgrid"))
+        if (MailServiceType.SENDGRID.getValue().equals(mailServiceType.toUpperCase()))
             return new SendGridFactory(sendGridApiKey);
-        else if (mailServiceType.equalsIgnoreCase("aws"))
+        else if (MailServiceType.AWS.getValue().equals(mailServiceType.toUpperCase()))
             return new AWSFactory(accessKey, secretKey, region);
-        else if (mailServiceType.equalsIgnoreCase("smtp"))
+        else if (MailServiceType.SMTP.getValue().equals(mailServiceType.toUpperCase()))
             return new SmtpFactory();
 
         throw new IllegalArgumentException("Invalid mail service type: " + mailServiceType);

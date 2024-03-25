@@ -15,16 +15,20 @@ import com.bjit.mailservice.exception.EmailException;
 import com.bjit.mailservice.models.MailContent;
 import com.bjit.mailservice.services.LoadMailTemplate;
 import com.bjit.mailservice.services.MailService;
-import com.bjit.mailservice.services.MailValidation;
+import com.bjit.mailservice.validators.MailValidation;
 import jakarta.activation.DataHandler;
 import jakarta.activation.FileDataSource;
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StreamUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
 
@@ -48,12 +52,20 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
             MimeMessage message = createMimeMessage(session, mailContent);
             Transport.send(message);
             return "Mail has been sent successfully.";
-        } catch (MessagingException e) {
+        } catch (MessagingException | EmailException e) {
             log.error("Error sending email", e);
             throw e;
         }
     }
 
+    /**
+     * Sends an HTML templated email with the specified mail content.
+     *
+     * @param mailContent The content of the email to be sent.
+     * @return A message indicating the result of the email sending operation.
+     * It could be a success message or an error message.
+     * @throws MessagingException If an error occurs during the email sending process.
+     */
     @Override
     public String sendHtmlTemplateMail(MailContent mailContent) throws MessagingException {
         try {
@@ -101,15 +113,16 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
             try {
                 addAttachmentParts(multipart, mailContent.getAttachments());
             } catch (EmailException e) {
-                throw new RuntimeException(e);
+                throw e;
             }
         }
         message.setContent(multipart);
         return message;
     }
 
+
     private void setEmailHeader(MimeMessage message, List<String> to,
-                                List<String> cc, List<String> bcc, String subject) {
+                                       List<String> cc, List<String> bcc, String subject) {
         try {
             message.setRecipients(Message.RecipientType.TO,
                     createInternetAddresses(to));
@@ -156,7 +169,7 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
      * @param attachments The file to be validated.
      * @throws EmailException If the file fails size or type validation.
      */
-    private void addAttachmentParts(Multipart multipart, List<File> attachments) throws EmailException {
+    private void addAttachmentParts(Multipart multipart, List<File> attachments) {
         try {
             for (File file : attachments) {
                 checkFileCompatibility(file);
@@ -166,15 +179,12 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
                 filePart.setFileName(file.getName());
                 multipart.addBodyPart(filePart);
             }
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
+        } catch (MessagingException | IOException e) {
+            log.error("Error sending email content", e);
+            throw new EmailException(e.getMessage());
         }
     }
 
-    @Override
-    public void checkFileCompatibility(File file) {
-        MailValidation.super.checkFileCompatibility(file);
-    }
 
     private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent) throws MessagingException {
         MimeMessage message = new MimeMessage(session);
