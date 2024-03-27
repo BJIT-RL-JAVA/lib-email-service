@@ -1,5 +1,7 @@
 package com.bjit.mailservice.services;
 
+
+import com.bjit.mailservice.constants.MessageConstant;
 import com.bjit.mailservice.exception.EmailException;
 import com.bjit.mailservice.services.impl.SmtpMailService;
 import org.slf4j.Logger;
@@ -42,8 +44,8 @@ public interface LoadMailTemplate {
             }
             return new String(templateBytes, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            log.error("Error loading HTML template file", e);
-            throw new RuntimeException("Error loading HTML template file", e);
+            log.error(MessageConstant.unsuccessful_template_loading, e);
+            throw new RuntimeException(MessageConstant.unsuccessful_template_loading, e);
         }
     }
 

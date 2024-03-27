@@ -1,5 +1,6 @@
 package com.bjit.mailservice.validators;
 
+import com.bjit.mailservice.constants.MessageConstant;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import jakarta.validation.ReportAsSingleViolation;
@@ -22,7 +23,7 @@ import java.lang.annotation.*;
 @Size(max = 25, groups = { Default.class })
 @ReportAsSingleViolation
 public @interface ValidAttachmentSize {
-    String message() default "Total size of attachments must not exceed 25 MB.";
+    String message() default MessageConstant.valid_Attachment_Size_message;
 
     Class<?>[] groups() default {};
 

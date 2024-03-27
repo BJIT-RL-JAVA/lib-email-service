@@ -1,11 +1,11 @@
 package com.bjit.mailservice.services.impl;
 
+import com.bjit.mailservice.constants.MessageConstant;
 import com.bjit.mailservice.services.LoadMailTemplate;
 import com.bjit.mailservice.services.MailService;
 import com.bjit.mailservice.validators.MailValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import com.bjit.mailservice.models.MailContent;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
@@ -18,11 +18,9 @@ import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
 import jakarta.mail.MessagingException;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StreamUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Base64;
 
@@ -91,7 +89,7 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
         }
 
         if (!validateHtmlTemplate(mailContent.getHtmlTemplate())) {
-            throw new IllegalArgumentException("Invalid File! Please provide an HTML file only.");
+            throw new IllegalArgumentException(MessageConstant.html_file_type_mismatched);
         }
 
         String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate(), mailContent.getObjectMap());
@@ -116,8 +114,8 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
                     sendGridAttachment.setFilename(attachment.getName());
                     mail.addAttachments(sendGridAttachment);
                 } catch (IOException ex) {
-                    LOGGER.error("IO exception occured ", ex);
-                    return "mail sending failed";
+                    LOGGER.error(MessageConstant.io_exception, ex);
+                    return MessageConstant.sendMail_error;
                 }
             }
         }
@@ -128,12 +126,12 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
             Response response = sendGrid.api(request);
-            LOGGER.info("Calling sendgrid api {} {}", response.getStatusCode(), response.getBody());
+            LOGGER.info(MessageConstant.sandgrid_api_call, response.getStatusCode(), response.getBody());
         } catch (IOException ex) {
-            LOGGER.error("IO exception occur in request ", ex);
-            return "mail sending failed";
+            LOGGER.error(MessageConstant.io_exception, ex);
+            return MessageConstant.sendMail_error;
         }
-        return "mail sent successfully";
+        return MessageConstant.sendMail_success;
     }
 
 }

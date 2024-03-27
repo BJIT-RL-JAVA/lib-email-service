@@ -11,6 +11,7 @@
 
 package com.bjit.mailservice.services.impl;
 
+import com.bjit.mailservice.constants.MessageConstant;
 import com.bjit.mailservice.exception.EmailException;
 import com.bjit.mailservice.models.MailContent;
 import com.bjit.mailservice.services.LoadMailTemplate;
@@ -22,13 +23,10 @@ import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StreamUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
 
@@ -51,9 +49,9 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
             Session session = createSmtpSession();
             MimeMessage message = createMimeMessage(session, mailContent);
             Transport.send(message);
-            return "Mail has been sent successfully.";
+            return MessageConstant.sendMail_success;
         } catch (MessagingException | EmailException e) {
-            log.error("Error sending email", e);
+            log.error(MessageConstant.sendMail_error, e);
             throw e;
         }
     }
@@ -72,9 +70,9 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
             Session session = createSmtpSession();
             MimeMessage message = createTemplateMimeMessage(session, mailContent);
             Transport.send(message);
-            return "HTML template mail has been sent successfully.";
+            return MessageConstant.successfully_sending_html_template_email;
         } catch (MessagingException e) {
-            log.error("Error sending HTML template email", e);
+            log.error(MessageConstant.error_sending_html_template_email, e);
             throw e;
         }
     }
@@ -180,7 +178,7 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
                 multipart.addBodyPart(filePart);
             }
         } catch (MessagingException | IOException e) {
-            log.error("Error sending email content", e);
+            log.error(MessageConstant.process_attachment_error, e);
             throw new EmailException(e.getMessage());
         }
     }

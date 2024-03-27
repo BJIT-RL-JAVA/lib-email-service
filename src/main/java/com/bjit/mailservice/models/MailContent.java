@@ -1,6 +1,7 @@
 package com.bjit.mailservice.models;
 
 
+import com.bjit.mailservice.constants.MessageConstant;
 import com.bjit.mailservice.validators.ValidAttachmentSize;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -24,10 +25,10 @@ import java.util.HashMap;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MailContent {
-    @Email
+    @Email(message = MessageConstant.from_email_address_invalid)
     private String from;
 
-    @NotEmpty(message = "Receiver is required")
+    @NotEmpty(message = MessageConstant.to_email_address_empty)
     private ArrayList<@NotNull String> to;
     private ArrayList<@NotNull String> cc;
     private ArrayList<@NotNull String> bcc;

@@ -1,35 +1,34 @@
 package com.bjit.mailservice.services.impl;
 
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
+import com.amazonaws.services.simpleemail.model.RawMessage;
+import com.amazonaws.services.simpleemail.model.SendRawEmailRequest;
+import com.bjit.mailservice.constants.MessageConstant;
 import com.bjit.mailservice.models.MailContent;
 import com.bjit.mailservice.services.LoadMailTemplate;
 import com.bjit.mailservice.services.MailService;
 import com.bjit.mailservice.validators.MailValidation;
+import jakarta.activation.DataHandler;
+import jakarta.activation.FileDataSource;
+import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
+import jakarta.mail.Multipart;
+import jakarta.mail.Session;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.ObjectUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Properties;
-
-import com.amazonaws.services.simpleemail.model.RawMessage;
-import com.amazonaws.services.simpleemail.model.SendRawEmailRequest;
-import jakarta.activation.DataHandler;
-import jakarta.activation.FileDataSource;
-import jakarta.mail.Message;
-import jakarta.mail.Multipart;
-import jakarta.mail.Session;
-import jakarta.mail.internet.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StreamUtils;
 
 /**
  * Implementation of the MailService interface for sending emails using AWS SES (Simple Email Service).
@@ -153,8 +152,7 @@ public class AwsMailService implements MailService, MailValidation, LoadMailTemp
 
             message.setContent(multipart);
 
-            System.out.println("Attempting to send an template email through Amazon SES "
-                    + "using the AWS SDK for Java...");
+            System.out.println(MessageConstant.aws_sendmail_log_message);
             PrintStream out = System.out;
             message.writeTo(out);
 
@@ -164,9 +162,9 @@ public class AwsMailService implements MailService, MailValidation, LoadMailTemp
             client.sendRawEmail(new SendRawEmailRequest(
                     new RawMessage(ByteBuffer.wrap(outputStream.toByteArray()))));
         } catch (IOException ex) {
-            LOGGER.error("Error sending email content", ex);
-            return "mail sending failed";
+            LOGGER.error(MessageConstant.process_attachment_error, ex);
+            return MessageConstant.sendMail_error;
         }
-        return "mail sent successfully";
+        return MessageConstant.sendMail_success;
     }
 }

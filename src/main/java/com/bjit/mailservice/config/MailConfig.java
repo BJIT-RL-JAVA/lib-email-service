@@ -1,5 +1,6 @@
 package com.bjit.mailservice.config;
 
+import com.bjit.mailservice.constants.MessageConstant;
 import com.bjit.mailservice.models.MailServiceType;
 import com.bjit.mailservice.services.MailSender;
 import com.bjit.mailservice.services.MailServiceFactory;
@@ -43,7 +44,7 @@ public class MailConfig {
         else if (MailServiceType.SMTP.getValue().equals(mailServiceType.toUpperCase()))
             return new SmtpFactory();
 
-        throw new IllegalArgumentException("Invalid mail service type: " + mailServiceType);
+        throw new IllegalArgumentException(MessageConstant.invalid_email_service + mailServiceType);
     }
 
     /**

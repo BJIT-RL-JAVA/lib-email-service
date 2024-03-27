@@ -1,7 +1,8 @@
 package com.bjit.mailservice.validators;
 
+import com.bjit.mailservice.constants.MessageConstant;
+
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +23,7 @@ public interface MailValidation {
      */
     default void checkFileCompatibility(File file) throws IOException {
         if (!file.exists()) {
-            throw new IOException("File does not exist: " + file.getAbsolutePath());
+            throw new IOException(MessageConstant.fileNotExists + file.getAbsolutePath());
         }
         String fileName = file.getName();
         String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
@@ -34,7 +35,7 @@ public interface MailValidation {
                 "msix", "msixbundle", "msp", "mst", "nsh", "pif", "ps1", "scr", "sct", "shb", "sys",
                 "vb", "vbe", "vbs", "vhd", "vxd", "wsc", "wsf", "wsh", "xll");
         if (blockedFileTypes.contains(fileExtension)) {
-            throw new RuntimeException("Unsupported file type: " + fileExtension + " - " + fileName);
+            throw new RuntimeException(MessageConstant.unsupported_file_type + fileExtension + " - " + fileName);
         }
     }
     default boolean validateHtmlTemplate(File htmlTemplate){
@@ -45,10 +46,10 @@ public interface MailValidation {
             if (fileSizeInMB <= 5) {
                 return true;
             } else {
-                throw new IllegalArgumentException("File size exceeds the maximum limit of 5MB.");
+                throw new IllegalArgumentException(MessageConstant.maximum_attachment_file_size);
             }
         } else {
-            throw new IllegalArgumentException("Invalid File! Please provide an HTML file only.");
+            throw new IllegalArgumentException(MessageConstant.html_file_type_mismatched);
         }
     }
 }
