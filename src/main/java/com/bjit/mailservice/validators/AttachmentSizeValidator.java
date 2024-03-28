@@ -1,4 +1,4 @@
-package com.bjit.mailservice.utils;
+package com.bjit.mailservice.validators;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

@@ -1,9 +1,8 @@
-package com.bjit.mailservice.utils;
+package com.bjit.mailservice.validators;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import jakarta.validation.ReportAsSingleViolation;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.groups.Default;
 
@@ -20,7 +19,7 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = { AttachmentSizeValidator.class })
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-@Size(max = 25, groups = { Default.class, ValidAttachment.class })
+@Size(max = 25, groups = { Default.class })
 @ReportAsSingleViolation
 public @interface ValidAttachmentSize {
     String message() default "Total size of attachments must not exceed 25 MB.";

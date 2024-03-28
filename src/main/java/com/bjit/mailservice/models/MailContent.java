@@ -1,7 +1,6 @@
 package com.bjit.mailservice.models;
 
-import com.bjit.mailservice.utils.ValidAttachment;
-import com.bjit.mailservice.utils.ValidAttachmentSize;
+import com.bjit.mailservice.validators.ValidAttachmentSize;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -34,6 +33,6 @@ public class MailContent {
     private String body;
     private String htmlTemplate;
 
-    @ValidAttachmentSize(groups = {Default.class, ValidAttachment.class})
+    @ValidAttachmentSize(groups = {Default.class})
     private ArrayList<File> attachments;
 }
