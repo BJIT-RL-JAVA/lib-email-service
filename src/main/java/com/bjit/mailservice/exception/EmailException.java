@@ -1,5 +1,5 @@
 /**
- * Created by Mohammad Khalid Hasan|| BJIT-R&D
+ * Created by Mohammad Khalid Hasan
  * Since: 1/25/2024
  * Version: 1.0
  */

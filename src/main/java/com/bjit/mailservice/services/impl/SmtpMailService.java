@@ -2,8 +2,8 @@
  * SmtpMailService is an implementation of the MailService interface that sends emails using the SMTP protocol.
  * It provides methods for sending emails with text content and attachments.
  * <p>
- * Created by Mohammad Khalid Hasan|| BJIT-R&D
- * Since: 3/27/2024
+ * Created by Mohammad Khalid Hasan
+ * Since: 1/23/2024
  * Time: 3:38 PM
  * Project Name: lib-email-service
  * Version: 1.0
@@ -193,7 +193,11 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
         setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
 
         // Load HTML content from template and process with dynamic values
-        String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate(), mailContent.getObjectMap());
+        File htmlTemplate=mailContent.getHtmlTemplate();
+        if (!ObjectUtils.isEmpty(htmlTemplate)) {
+            validateHtmlTemplate(htmlTemplate);
+        }
+        String htmlContent = loadHtmlTemplate(htmlTemplate, mailContent.getObjectMap());
 
         // Create a multipart to hold both HTML content and other parts (if any)
         MimeMultipart multipart = new MimeMultipart();

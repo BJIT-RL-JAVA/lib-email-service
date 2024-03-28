@@ -1,3 +1,13 @@
+/**
+ * Loads an HTML template file and processes it with dynamic content
+ * <p>
+ * Created by Mohammad Khalid Hasan
+ * Since: 3/19/2024
+ * Time: 10:10 AM
+ * Project Name: lib-email-service
+ * Version: 1.0
+ */
+
 package com.bjit.mailservice.services;
 
 import com.bjit.mailservice.constants.MessageConstant;

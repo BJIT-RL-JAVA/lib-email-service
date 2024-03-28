@@ -85,10 +85,12 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
         for (String toEmail : mailContent.getTo()) {
             personalization.addTo(new Email(toEmail));
         }
-        if (!validateHtmlTemplate(mailContent.getHtmlTemplate())) {
-            throw new IllegalArgumentException(MessageConstant.html_file_type_mismatched);
+
+        File htmlTemplate=mailContent.getHtmlTemplate();
+        if (!ObjectUtils.isEmpty(htmlTemplate)) {
+            validateHtmlTemplate(htmlTemplate);
         }
-        String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate(), mailContent.getObjectMap());
+        String htmlContent = loadHtmlTemplate(htmlTemplate, mailContent.getObjectMap());
 
         mail.addPersonalization(personalization);
         mail.setSubject(mailContent.getSubject());

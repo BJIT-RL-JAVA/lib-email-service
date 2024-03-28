@@ -1,5 +1,6 @@
 /**
- * Created by Mohammad Khalid Hasan|| BJIT-R&D
+ * <p>Error, Log and other relevant messages can be managed from here.</p>
+ * Created by Mohammad Khalid Hasan
  * Since: 3/27/2024
  * Version: 1.0
  */

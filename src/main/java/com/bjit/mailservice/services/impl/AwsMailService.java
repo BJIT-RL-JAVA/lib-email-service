@@ -92,7 +92,13 @@ public class AwsMailService implements MailService, MailValidation, LoadMailTemp
         Session session = Session.getDefaultInstance(new Properties());
 
         MimeMessage message = generateMimeMessage(mailContent, session);
-        String htmlContent = loadHtmlTemplate( mailContent.getHtmlTemplate(), mailContent.getObjectMap());
+
+        File htmlTemplate=mailContent.getHtmlTemplate();
+        if (!ObjectUtils.isEmpty(htmlTemplate)) {
+            validateHtmlTemplate(htmlTemplate);
+        }
+        String htmlContent = loadHtmlTemplate(htmlTemplate, mailContent.getObjectMap());
+
         mailSend(htmlContent, mailContent, message);
         return MessageConstant.sendMail_success;
     }
