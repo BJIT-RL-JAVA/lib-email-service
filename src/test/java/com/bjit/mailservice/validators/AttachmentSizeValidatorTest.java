@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -20,12 +22,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Mallika Dey
  */
 @SpringBootTest
+@TestPropertySource(locations = "/application-test.properties")
 public class AttachmentSizeValidatorTest {
     @InjectMocks
     private AttachmentSizeValidator attachmentSizeValidator;
 
     @Mock
     private ConstraintValidatorContext constraintValidatorContext;
+
+    @Value("${file.valid.location}")
+    private String validFile;
+
+    @Value("${file.invalid.large.location}")
+    private String largeFile;
 
     @BeforeEach
     void setUp() {
@@ -35,14 +44,14 @@ public class AttachmentSizeValidatorTest {
     @Test
     public void fileSizeMoreThan25MBShouldReturnFalse() {
         ArrayList<File> files = new ArrayList<>(List.of(
-                new File("E:\\Mallika Dey\\downloads\\jdk-17.0.10_windows-x64_bin.exe")));
+                new File(largeFile)));
         assertFalse(attachmentSizeValidator.isValid(files, constraintValidatorContext));
     }
 
     @Test
     public void ListOfFileIsLessThan25MBShouldReturnTrue() {
         ArrayList<File> files = new ArrayList<>(List.of(
-                new File("E:\\Mallika Dey\\materials\\others\\sss.txt")));
+                new File(validFile)));
         assertTrue(attachmentSizeValidator.isValid(files, constraintValidatorContext));
     }
 

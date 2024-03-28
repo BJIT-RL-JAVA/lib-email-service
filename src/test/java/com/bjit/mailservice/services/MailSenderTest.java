@@ -6,7 +6,9 @@ import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,10 +21,13 @@ import static org.mockito.Mockito.*;
  * @author Mallika Dey
  */
 @SpringBootTest
+@TestPropertySource(locations = "/application-test.properties")
 public class MailSenderTest {
     private MailSender mailSender;
     private MailServiceFactory mockMailServiceFactory;
     private MailService mockMailService;
+    @Value("${file.valid.location}")
+    private String fileName;
 
     @BeforeEach
     void setUp() {
@@ -72,7 +77,7 @@ public class MailSenderTest {
         mailContent.setBody("testing aws ses using mockito");
         mailContent.setAttachments(
                 new ArrayList<>(Arrays.asList(
-                        new File("E:\\Mallika Dey\\materials\\others\\sss.txt"))));
+                        new File(fileName))));
 
         return mailContent;
     }

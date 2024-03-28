@@ -14,19 +14,28 @@ MailService is a Java-based library that provides functionality for sending emai
 
 ## QuickStart
 
-To use MailService in your project, you can include it as a dependency in your Maven or Gradle build file.
+To use MailService in your project, you can include it as a jar.
 
 ### Installation
 
-Add the following dependency to your `pom.xml`:
+Add the `mailservice-0.0.1-SNAPSHOT-jar-with-dependencies.jar` in your project.
 
-```xml
-<dependency>
-    <groupId>com.example</groupId>
-    <artifactId>mailservice</artifactId>
-    <version>1.0.0</version>
-</dependency>
-```
+[//]: # (Add the following dependency to your `pom.xml`:)
+
+[//]: # ()
+[//]: # (```xml)
+
+[//]: # (<dependency>)
+
+[//]: # (    <groupId>com.example</groupId>)
+
+[//]: # (    <artifactId>mailservice</artifactId>)
+
+[//]: # (    <version>1.0.0</version>)
+
+[//]: # (</dependency>)
+
+[//]: # (```)
 
 ### Configuration
 Before using MailService, you need to configure it with the appropriate settings for your chosen email service provider. Below are the configuration options for AWS SES, SendGrid:
@@ -64,6 +73,18 @@ mail:
 
 ### Usage
 To send an email using MailService, follow these steps:
+
+- Add _com.bjit_ to the component scan. Here is an example,
+```java
+@ComponentScan(basePackages = {"org.example", "com.bjit"})
+public class Application {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+
+}
+```
 
 - Create a MailContent object with the email details, including the recipient(s), sender, subject, and body.
 

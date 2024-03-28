@@ -10,7 +10,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,12 +28,17 @@ import static org.mockito.Mockito.when;
  * @author Mallika Dey
  */
 @SpringBootTest
+@TestPropertySource(locations = "/application-test.properties")
 public class SendGridMailServiceTest {
     @Mock
     private SendGrid sendGrid;
     @InjectMocks
     private SendGridMailService sendGridMailService;
     private MailContent mailContent;
+    @Value("${file.valid.location}")
+    private String validFile;
+    @Value("${file.invalid.location}")
+    private String invalidFile;
 
     @BeforeEach
     void setUp() {
@@ -53,7 +60,7 @@ public class SendGridMailServiceTest {
     public void mailSendUsingSendGridTest_FileNotFound_ShouldFailed()
             throws MessagingException {
         mailContent.setAttachments(new ArrayList<>(List.of(
-                new File("abc.txt"))));
+                new File(invalidFile))));
         try {
             when(sendGrid.api(any(Request.class))).thenReturn(new Response());
         } catch (IOException ignored) {
@@ -83,7 +90,7 @@ public class SendGridMailServiceTest {
         mailContent.setSubject("Testing aws ses mail service");
         mailContent.setBody("testing aws ses using mockito");
         mailContent.setAttachments(new ArrayList<>(List.of(
-                new File("E:\\Mallika Dey\\materials\\others\\sss.txt"))));
+                new File(validFile))));
 
         return mailContent;
     }

@@ -6,6 +6,9 @@ import com.bjit.mailservice.services.impl.SmtpMailService;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,9 +22,15 @@ import static org.mockito.Mockito.when;
 /**
  * @author Mallika Dey
  */
+@SpringBootTest
+@TestPropertySource(locations = "/application-test.properties")
 public class SMTPMailServiceTest {
     private SmtpMailService smtpMailService;
     private MailContent mailContent;
+    @Value("${file.valid.location}")
+    private String validFile;
+    @Value("${file.invalid.location}")
+    private String invalidFile;
 
     @BeforeEach
     public void setUp() {
@@ -36,7 +45,7 @@ public class SMTPMailServiceTest {
         when(mailContent.getBcc()).thenReturn(new ArrayList<>(List.of("abc2@gmail.com")));
         when(mailContent.getAttachments())
                 .thenReturn(new ArrayList<>(
-                        List.of(new File("E:\\Mallika Dey\\materials\\others\\sss.txt"))));
+                        List.of(new File(validFile))));
 
         String result = smtpMailService.sendMail(mailContent);
 
@@ -63,7 +72,7 @@ public class SMTPMailServiceTest {
     @Test
     public void testSendMailFail() throws MessagingException {
         when(mailContent.getAttachments())
-                .thenReturn(new ArrayList<>(List.of(new File("abc.txt"))));
+                .thenReturn(new ArrayList<>(List.of(new File(invalidFile))));
 
         assertThrows(EmailException.class, () ->
                 smtpMailService.sendMail(mailContent));
