@@ -17,8 +17,8 @@ public class MessageConstant {
     public static final String io_exception = "IO exception occur in request ";
 
     //SMTP Mail Service Class Messages
-    public static final String sendMail_success = "Mail has been sent successfully.";
-    public static final String sendMail_error = "Error sending simple email ";
+    public static final String sendMail_success = "mail sent successfully";
+    public static final String sendMail_error = "mail sending failed";
     public static final String successfully_sending_html_template_email =
             "HTML template mail has been sent successfully.";
     public static final String error_sending_html_template_email = "Error sending HTML template email";

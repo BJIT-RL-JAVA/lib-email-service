@@ -36,10 +36,6 @@ import static org.mockito.Mockito.*;
 public class SMTPMailServiceTest {
     @Mock
     private SmtpCredential smtpCredential;
-    //    @Mock
-//    private Session session;
-    //@Mock
-    //private Properties properties;
     @InjectMocks
     private SmtpMailService smtpMailService;
     private MailContent mailContent;
@@ -65,18 +61,30 @@ public class SMTPMailServiceTest {
 
         String result = smtpMailService.sendMail(mailContent);
 
-        assertEquals("Mail has been sent successfully.", result);
+        assertEquals("mail sent successfully", result);
     }
 
-//    @Test
-//    public void testSendHtmlTemplateMailUsingCustomizeTemplate_Successful() throws MessagingException {
-//        when(mailContent.getBcc()).thenReturn(null);
-//        when(mailContent.getHtmlTemplate()).thenReturn("[Dynamic Content]");
-//
-//        String result = smtpMailService.sendHtmlTemplateMail(mailContent);
-//
-//        assertEquals("HTML template mail has been sent successfully.", result);
-//    }
+    @Test
+    public void testSendHtmlTemplateMailUsingCustomizeTemplate_Successful() throws MessagingException {
+        when(mailContent.getBcc()).thenReturn(null);
+        when(mailContent.getAttachments()).thenReturn(new ArrayList<>(
+                List.of(new File(validFile))));
+        when(mailContent.getHtmlTemplate()).thenReturn(new File(validFile));
+
+        String result = smtpMailService.sendHtmlTemplateMail(mailContent);
+
+        assertEquals("HTML template mail has been sent successfully.", result);
+    }
+
+    @Test
+    public void testSendHtmlTemplateMailUsingCustomizeTemplate_Failed() throws MessagingException {
+        when(mailContent.getBcc()).thenReturn(null);
+        when(mailContent.getAttachments()).thenReturn(new ArrayList<>(
+                List.of(new File(validFile))));
+        when(mailContent.getHtmlTemplate()).thenReturn(new File(invalidFile));
+
+        assertThrows(IllegalArgumentException.class, () -> smtpMailService.sendHtmlTemplateMail(mailContent));
+    }
 
     @Test
     public void testSendHtmlTemplateMailUsingDefaultTemplate_Successful() throws MessagingException {

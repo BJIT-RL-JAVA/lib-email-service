@@ -198,6 +198,10 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
     private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent) throws MessagingException {
         MimeMessage message = new MimeMessage(session);
         setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
+        File htmlTemplate = mailContent.getHtmlTemplate();
+        if (!ObjectUtils.isEmpty(htmlTemplate)) {
+            validateHtmlTemplate(htmlTemplate);
+        }
 
         // Load HTML content from template and process with dynamic values
         String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate(), mailContent.getObjectMap());
@@ -213,11 +217,7 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
 
         // Add other parts (attachments, text, etc.) to the multipart
         if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
-            try {
-                addAttachmentParts(multipart, mailContent.getAttachments());
-            } catch (EmailException e) {
-                throw new RuntimeException(e);
-            }
+            addAttachmentParts(multipart, mailContent.getAttachments());
         }
         // Set the multipart as the content of the MimeMessage
         message.setContent(multipart);

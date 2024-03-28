@@ -12,7 +12,7 @@
     <artifactId>mailservice</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>lib-email-service</name>
-    <description>Demo project for Spring Boot</description>
+    <description>Spring Boot project providing a comprehensive email service solution.</description>
     <packaging>jar</packaging>
     <properties>
         <java.version>17</java.version>
