@@ -1,6 +1,5 @@
 package com.bjit.mailservice.services;
 
-
 import com.bjit.mailservice.constants.MessageConstant;
 import com.bjit.mailservice.exception.EmailException;
 import com.bjit.mailservice.services.impl.SmtpMailService;

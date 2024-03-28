@@ -2,13 +2,12 @@
  * SmtpMailService is an implementation of the MailService interface that sends emails using the SMTP protocol.
  * It provides methods for sending emails with text content and attachments.
  *
- * @author Khalid|| BJIT-R&D
- * @since: 1/26/2024
+ * Created by Mohammad Khalid Hasan|| BJIT-R&D
+ * Since: 3/27/2024
  * Time: 3:38 PM
  * Project Name: lib-email-service
- * @version 1.0
+ * Version: 1.0
  */
-
 package com.bjit.mailservice.services.impl;
 
 import com.bjit.mailservice.constants.MessageConstant;
@@ -31,9 +30,7 @@ import java.util.List;
 import java.util.Properties;
 
 public class SmtpMailService implements MailService, MailValidation, LoadMailTemplate {
-
     private static final Logger log = LoggerFactory.getLogger(SmtpMailService.class);
-
     /**
      * Sends an email with the specified mail content.
      *
@@ -77,6 +74,15 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
         }
     }
 
+    /**
+     * Creates an SMTP session with authentication and TLS enabled.
+     *
+     * Configures the server host, port, and  enables authentication,
+     * TLS for secure email transmission as well as new Authenticator
+     * instance to handle the SMTP authentication process
+     *
+     * @return A new Session object configured with SMTP settings.
+     */
     private Session createSmtpSession() {
         Properties properties = new Properties();
         properties.put("mail.smtp.auth", true);
@@ -104,7 +110,8 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
     private MimeMessage createMimeMessage(Session session, MailContent mailContent)
             throws MessagingException {
         MimeMessage message = new MimeMessage(session);
-        setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
+        setEmailHeader(message, mailContent.getTo(), mailContent.getCc(),
+                mailContent.getBcc(), mailContent.getSubject());
         Multipart multipart = new MimeMultipart();
         addTextPart(multipart, mailContent.getBody());
         if (!mailContent.getAttachments().isEmpty()) {
@@ -117,7 +124,6 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
         message.setContent(multipart);
         return message;
     }
-
 
     private void setEmailHeader(MimeMessage message, List<String> to,
                                        List<String> cc, List<String> bcc, String subject) {
@@ -139,7 +145,6 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
         if (addresses == null) {
             return new Address[0]; // Return an empty array if the addresses list is null
         }
-
         Address[] internetAddresses = new Address[addresses.size()];
         for (int i = 0; i < addresses.size(); i++) {
             internetAddresses[i] = new InternetAddress(addresses.get(i));
@@ -182,7 +187,6 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
             throw new EmailException(e.getMessage());
         }
     }
-
 
     private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent) throws MessagingException {
         MimeMessage message = new MimeMessage(session);

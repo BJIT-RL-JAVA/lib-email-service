@@ -114,15 +114,12 @@ public class AwsMailService implements MailService, MailValidation, LoadMailTemp
         if (!ObjectUtils.isEmpty(mailContent.getBcc())) {
             setRecipients(message, Message.RecipientType.BCC, mailContent.getBcc());
         }
-
         message.setFrom(new InternetAddress(mailContent.getFrom()));
-
         return message;
     }
 
     private void setRecipients(MimeMessage message, Message.RecipientType type,
                                ArrayList<String> addresses) throws MessagingException {
-
         ArrayList<InternetAddress> addressTo = new ArrayList<InternetAddress>();
         for (String address : addresses) {
             addressTo.add(new InternetAddress(address));
@@ -149,7 +146,6 @@ public class AwsMailService implements MailService, MailValidation, LoadMailTemp
                     multipart.addBodyPart(filePart);
                 }
             }
-
             message.setContent(multipart);
 
             System.out.println(MessageConstant.aws_sendmail_log_message);

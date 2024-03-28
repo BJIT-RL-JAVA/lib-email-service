@@ -32,7 +32,6 @@ import java.util.Base64;
  */
 public class SendGridMailService implements MailService, MailValidation, LoadMailTemplate {
     private static final Logger LOGGER = LoggerFactory.getLogger(SendGridMailService.class);
-
     private SendGrid sendGrid;
 
     /**
@@ -60,7 +59,6 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
         for (String toEmail : mailContent.getTo()) {
             personalization.addTo(new Email(toEmail));
         }
-
         mail.addPersonalization(personalization);
         mail.setSubject(mailContent.getSubject());
         mail.addContent(new Content("text/plain", mailContent.getBody()));
@@ -87,11 +85,9 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
         for (String toEmail : mailContent.getTo()) {
             personalization.addTo(new Email(toEmail));
         }
-
         if (!validateHtmlTemplate(mailContent.getHtmlTemplate())) {
             throw new IllegalArgumentException(MessageConstant.html_file_type_mismatched);
         }
-
         String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate(), mailContent.getObjectMap());
 
         mail.addPersonalization(personalization);
@@ -105,7 +101,6 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
     private String mailSendUsingSendGrid(MailContent mailContent, Mail mail) {
         if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
             for (File attachment : mailContent.getAttachments()) {
-
                 try {
                     checkFileCompatibility(attachment);
                     byte[] fileContent = Files.readAllBytes(attachment.toPath());
@@ -133,5 +128,4 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
         }
         return MessageConstant.sendMail_success;
     }
-
 }

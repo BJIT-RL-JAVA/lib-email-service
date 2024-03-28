@@ -1,6 +1,5 @@
 package com.bjit.mailservice.models;
 
-
 import com.bjit.mailservice.constants.MessageConstant;
 import com.bjit.mailservice.validators.ValidAttachmentSize;
 import jakarta.validation.constraints.Email;
