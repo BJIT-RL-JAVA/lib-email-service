@@ -103,9 +103,6 @@ public class AwsMailService implements MailService, MailValidation {
 
         message.setSubject(mailContent.getSubject(), "UTF-8");
 
-        ArrayList<InternetAddress> addressCc = new ArrayList<InternetAddress>();
-        ArrayList<InternetAddress> addressBCc = new ArrayList<InternetAddress>();
-
         if (!ObjectUtils.isEmpty(mailContent.getTo())) {
             setRecipients(message, Message.RecipientType.TO, mailContent.getTo());
         }

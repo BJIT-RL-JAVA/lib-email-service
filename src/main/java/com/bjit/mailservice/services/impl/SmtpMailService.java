@@ -2,6 +2,7 @@ package com.bjit.mailservice.services.impl;
 
 import com.bjit.mailservice.exception.EmailException;
 import com.bjit.mailservice.models.MailContent;
+import com.bjit.mailservice.models.SmtpCredential;
 import com.bjit.mailservice.services.MailService;
 import com.bjit.mailservice.validators.MailValidation;
 import jakarta.activation.DataHandler;
@@ -11,6 +12,7 @@ import jakarta.mail.internet.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
 
 import java.io.File;
@@ -31,6 +33,12 @@ import java.util.Properties;
 public class SmtpMailService implements MailService, MailValidation {
 
     private static final Logger log = LoggerFactory.getLogger(SmtpMailService.class);
+
+    private SmtpCredential smtpCredential;
+
+    public SmtpMailService(SmtpCredential smtpCredential) {
+        this.smtpCredential = smtpCredential;
+    }
 
     /**
      * Sends an email with the specified mail content.
@@ -76,16 +84,16 @@ public class SmtpMailService implements MailService, MailValidation {
 
     private Session createSmtpSession() {
         Properties properties = new Properties();
-        properties.put("mail.smtp.auth", true);
-        properties.put("mail.smtp.starttls.enable", true);
-        properties.put("mail.smtp.port", "587");
-        properties.put("mail.smtp.host", "smtp.gmail.com");
+        properties.put("mail.smtp.auth", smtpCredential.getSmtpAuth());
+        properties.put("mail.smtp.starttls.enable", smtpCredential.getEnableStartTls());
+        properties.put("mail.smtp.port", smtpCredential.getSmtpPort());
+        properties.put("mail.smtp.host", smtpCredential.getSmtpHost());
 
         return Session.getInstance(properties, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication
-                        ("khalid.hasan.bjit", "zlpr ncix ceil ntlv");
+                        (smtpCredential.getUserMail(), smtpCredential.getUserPassword());
             }
         });
     }
@@ -104,7 +112,16 @@ public class SmtpMailService implements MailService, MailValidation {
         setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
         Multipart multipart = new MimeMultipart();
         addTextPart(multipart, mailContent.getBody());
-        addAttachmentParts(multipart, mailContent.getAttachments());
+        //addAttachmentParts(multipart, mailContent.getAttachments());
+        //--------st
+        if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
+            try {
+                addAttachmentParts(multipart, mailContent.getAttachments());
+            } catch (EmailException e) {
+                throw e;
+            }
+        }
+        //-------rem
         message.setContent(multipart);
         return message;
     }
