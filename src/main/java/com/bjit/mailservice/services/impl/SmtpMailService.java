@@ -112,16 +112,7 @@ public class SmtpMailService implements MailService, MailValidation {
         setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
         Multipart multipart = new MimeMultipart();
         addTextPart(multipart, mailContent.getBody());
-        //addAttachmentParts(multipart, mailContent.getAttachments());
-        //--------st
-        if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
-            try {
-                addAttachmentParts(multipart, mailContent.getAttachments());
-            } catch (EmailException e) {
-                throw e;
-            }
-        }
-        //-------rem
+        addAttachmentParts(multipart, mailContent.getAttachments());
         message.setContent(multipart);
         return message;
     }

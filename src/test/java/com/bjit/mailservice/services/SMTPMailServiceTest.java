@@ -2,10 +2,19 @@ package com.bjit.mailservice.services;
 
 import com.bjit.mailservice.exception.EmailException;
 import com.bjit.mailservice.models.MailContent;
+import com.bjit.mailservice.models.SmtpCredential;
 import com.bjit.mailservice.services.impl.SmtpMailService;
+import jakarta.mail.Authenticator;
 import jakarta.mail.MessagingException;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
@@ -13,11 +22,11 @@ import org.springframework.test.context.TestPropertySource;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Mallika Dey
@@ -25,6 +34,13 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @TestPropertySource(locations = "/application-test.properties")
 public class SMTPMailServiceTest {
+    @Mock
+    private SmtpCredential smtpCredential;
+    //    @Mock
+//    private Session session;
+    //@Mock
+    //private Properties properties;
+    @InjectMocks
     private SmtpMailService smtpMailService;
     private MailContent mailContent;
     @Value("${file.valid.location}")
@@ -34,10 +50,10 @@ public class SMTPMailServiceTest {
 
     @BeforeEach
     public void setUp() {
-        smtpMailService = new SmtpMailService();
+        MockitoAnnotations.initMocks(this);
         mailContent = mock(MailContent.class);
-
         mailContentFieldMock();
+        smtpCredentialMock();
     }
 
     @Test
@@ -78,9 +94,18 @@ public class SMTPMailServiceTest {
                 smtpMailService.sendMail(mailContent));
     }
 
+    private void smtpCredentialMock() {
+        when(smtpCredential.getSmtpHost()).thenReturn("smtp.gmail.com");
+        when(smtpCredential.getSmtpPort()).thenReturn("587");
+        when(smtpCredential.getUserMail()).thenReturn("username");
+        when(smtpCredential.getUserPassword()).thenReturn("pass");
+        when(smtpCredential.getEnableStartTls()).thenReturn(true);
+        when(smtpCredential.getSmtpAuth()).thenReturn(true);
+    }
+
     private void mailContentFieldMock() {
-        when(mailContent.getFrom()).thenReturn("ab@gmail.com");
-        when(mailContent.getTo()).thenReturn(new ArrayList<>(List.of("abc@gmail.com")));
+        when(mailContent.getFrom()).thenReturn("khalid.hasan.bjit@gmail.com");
+        when(mailContent.getTo()).thenReturn(new ArrayList<>(List.of("mallika.dey@bjitgroup.com")));
         when(mailContent.getCc()).thenReturn(new ArrayList<>(List.of("abc1@gmail.com")));
         when(mailContent.getSubject()).thenReturn("Test Subject");
         when(mailContent.getBody()).thenReturn("Test Body");
