@@ -21,7 +21,6 @@ public interface MailService {
      * @return String for mail sending confirmation
      * @throws MessagingException If an error occurs during the email sending process.
      */
-
     String sendMail(MailContent mailContent) throws MessagingException;
 
     /**

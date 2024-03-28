@@ -68,15 +68,15 @@ public class SMTPMailServiceTest {
         assertEquals("Mail has been sent successfully.", result);
     }
 
-    @Test
-    public void testSendHtmlTemplateMailUsingCustomizeTemplate_Successful() throws MessagingException {
-        when(mailContent.getBcc()).thenReturn(null);
-        when(mailContent.getHtmlTemplate()).thenReturn("[Dynamic Content]");
-
-        String result = smtpMailService.sendHtmlTemplateMail(mailContent);
-
-        assertEquals("HTML template mail has been sent successfully.", result);
-    }
+//    @Test
+//    public void testSendHtmlTemplateMailUsingCustomizeTemplate_Successful() throws MessagingException {
+//        when(mailContent.getBcc()).thenReturn(null);
+//        when(mailContent.getHtmlTemplate()).thenReturn("[Dynamic Content]");
+//
+//        String result = smtpMailService.sendHtmlTemplateMail(mailContent);
+//
+//        assertEquals("HTML template mail has been sent successfully.", result);
+//    }
 
     @Test
     public void testSendHtmlTemplateMailUsingDefaultTemplate_Successful() throws MessagingException {

@@ -1,6 +1,7 @@
 package com.bjit.mailservice.config;
 
 import com.bjit.mailservice.exception.EmailException;
+import com.bjit.mailservice.constants.MessageConstant;
 import com.bjit.mailservice.models.MailServiceType;
 import com.bjit.mailservice.models.SmtpCredential;
 import com.bjit.mailservice.services.MailSender;
@@ -73,7 +74,7 @@ public class MailConfig {
             return new SmtpFactory(smtpCredential);
         }
 
-        throw new EmailException("Invalid mail service type: " + mailServiceType);
+        throw new EmailException(MessageConstant.invalid_email_service + mailServiceType);
     }
 
     /**
