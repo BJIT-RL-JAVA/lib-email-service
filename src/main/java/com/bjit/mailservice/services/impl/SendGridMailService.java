@@ -114,7 +114,6 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
                 }
             }
         }
-
         Request request = new Request();
         try {
             request.setMethod(Method.POST);

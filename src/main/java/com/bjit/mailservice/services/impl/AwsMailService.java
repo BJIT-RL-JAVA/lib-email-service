@@ -8,6 +8,7 @@ import com.bjit.mailservice.models.MailContent;
 import com.bjit.mailservice.services.LoadMailTemplate;
 import com.bjit.mailservice.services.MailService;
 import com.bjit.mailservice.validators.MailValidation;
+
 import jakarta.activation.DataHandler;
 import jakarta.activation.FileDataSource;
 import jakarta.mail.Message;
@@ -93,7 +94,7 @@ public class AwsMailService implements MailService, MailValidation, LoadMailTemp
         MimeMessage message = generateMimeMessage(mailContent, session);
         String htmlContent = loadHtmlTemplate( mailContent.getHtmlTemplate(), mailContent.getObjectMap());
         mailSend(htmlContent, mailContent, message);
-        return "mail sent successfully";
+        return MessageConstant.sendMail_success;
     }
 
     private MimeMessage generateMimeMessage(MailContent mailContent,

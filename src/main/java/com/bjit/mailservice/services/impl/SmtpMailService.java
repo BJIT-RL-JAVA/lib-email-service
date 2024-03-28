@@ -1,7 +1,7 @@
 /**
  * SmtpMailService is an implementation of the MailService interface that sends emails using the SMTP protocol.
  * It provides methods for sending emails with text content and attachments.
- *
+ * <p>
  * Created by Mohammad Khalid Hasan|| BJIT-R&D
  * Since: 3/27/2024
  * Time: 3:38 PM
@@ -76,7 +76,7 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
 
     /**
      * Creates an SMTP session with authentication and TLS enabled.
-     *
+     * <p>
      * Configures the server host, port, and  enables authentication,
      * TLS for secure email transmission as well as new Authenticator
      * instance to handle the SMTP authentication process
@@ -118,6 +118,7 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
             try {
                 addAttachmentParts(multipart, mailContent.getAttachments());
             } catch (EmailException e) {
+                log.error(MessageConstant.process_attachment_error);
                 throw e;
             }
         }
@@ -125,8 +126,7 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
         return message;
     }
 
-    private void setEmailHeader(MimeMessage message, List<String> to,
-                                       List<String> cc, List<String> bcc, String subject) {
+    private void setEmailHeader(MimeMessage message, List<String> to,List<String> cc, List<String> bcc, String subject) {
         try {
             message.setRecipients(Message.RecipientType.TO,
                     createInternetAddresses(to));
