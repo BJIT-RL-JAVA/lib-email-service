@@ -1,17 +1,3 @@
-cloud:
-  aws:
-    region:
-      static:
-      auto: false
-    stack:
-      auto: false
-    credentials:
-      accessKey:
-      secretKey:
-
-sendgrid:
-  api:
-    key:
 mail:
   service:
     type: smtp

@@ -1,5 +1,6 @@
 package com.bjit.mailservice.services;
 
+import com.bjit.mailservice.constants.MessageConstant;
 import com.bjit.mailservice.models.MailContent;
 import jakarta.validation.*;
 import org.springframework.util.ObjectUtils;
@@ -21,7 +22,7 @@ public class MailContentValidation {
      */
     public static void validateMailContent(MailContent mailContent) {
         if (ObjectUtils.isEmpty(mailContent)) {
-            throw new IllegalArgumentException("MailContent must not be null");
+            throw new IllegalArgumentException(MessageConstant.not_null_MailContent);
         }
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();

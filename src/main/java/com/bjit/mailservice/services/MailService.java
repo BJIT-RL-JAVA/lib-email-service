@@ -13,7 +13,6 @@ import jakarta.mail.MessagingException;
  * @author Mallika Dey
  */
 public interface MailService {
-
     String sendMail(MailContent mailContent) throws MessagingException;
 
     String sendHtmlTemplateMail(MailContent mailContent) throws MessagingException;
