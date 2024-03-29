@@ -14,17 +14,11 @@ public class MessageConstant {
     public static final String from_email_address_invalid = "Invalid 'from' email address. ";
     public static final String to_email_address_empty = "Please provide at least one recipient email address.";
 
-    //AWS-SES Service Class Messages
-    public static final String aws_sendmail_log_message = "Attempting to send an template email through " +
-            "Amazon SES using the AWS SDK for Java...";
-
-    //SandGrid Service Class Messages
-    public static final String sandgrid_api_call = "Calling sendgrid api {} {}";
     public static final String io_exception = "IO exception occur in request ";
 
     //SMTP Mail Service Class Messages
-    public static final String sendMail_success = "Mail has been sent successfully.";
-    public static final String sendMail_error = "Error sending simple email ";
+    public static final String sendMail_success = "mail sent successfully";
+    public static final String sendMail_error = "mail sending failed";
     public static final String successfully_sending_html_template_email =
             "HTML template mail has been sent successfully.";
     public static final String error_sending_html_template_email = "Error sending HTML template email";
@@ -45,6 +39,5 @@ public class MessageConstant {
 
     // ValidAttachmentSize Class Messages
     public static final String valid_Attachment_Size_message = "Total size of attachments must not exceed 25 MB.";
-
 
 }

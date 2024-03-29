@@ -1,18 +1,9 @@
-/**
- * SmtpMailService is an implementation of the MailService interface that sends emails using the SMTP protocol.
- * It provides methods for sending emails with text content and attachments.
- * <p>
- * Created by Mohammad Khalid Hasan|| BJIT-R&D
- * Since: 3/27/2024
- * Time: 3:38 PM
- * Project Name: lib-email-service
- * Version: 1.0
- */
 package com.bjit.mailservice.services.impl;
 
 import com.bjit.mailservice.constants.MessageConstant;
 import com.bjit.mailservice.exception.EmailException;
 import com.bjit.mailservice.models.MailContent;
+import com.bjit.mailservice.models.SmtpCredential;
 import com.bjit.mailservice.services.LoadMailTemplate;
 import com.bjit.mailservice.services.MailService;
 import com.bjit.mailservice.validators.MailValidation;
@@ -29,8 +20,25 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
+/**
+ * SmtpMailService is an implementation of the MailService interface that sends emails using the SMTP protocol.
+ * It provides methods for sending emails with text content and attachments.
+ *
+ * @author Khalid
+ * @version 1.0
+ * Time: 3:38 PM
+ * Project Name: lib-email-service
+ */
 public class SmtpMailService implements MailService, MailValidation, LoadMailTemplate {
+
     private static final Logger log = LoggerFactory.getLogger(SmtpMailService.class);
+
+    private SmtpCredential smtpCredential;
+
+    public SmtpMailService(SmtpCredential smtpCredential) {
+        this.smtpCredential = smtpCredential;
+    }
+
     /**
      * Sends an email with the specified mail content.
      *
@@ -42,7 +50,6 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
     @Override
     public String sendMail(MailContent mailContent) throws MessagingException {
         try {
-
             Session session = createSmtpSession();
             MimeMessage message = createMimeMessage(session, mailContent);
             Transport.send(message);
@@ -54,7 +61,7 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
     }
 
     /**
-     * Sends an HTML templated email with the specified mail content.
+     * Sends an HTML templated email using SMTP with the specified mail content.
      *
      * @param mailContent The content of the email to be sent.
      * @return A message indicating the result of the email sending operation.
@@ -85,16 +92,16 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
      */
     private Session createSmtpSession() {
         Properties properties = new Properties();
-        properties.put("mail.smtp.auth", true);
-        properties.put("mail.smtp.starttls.enable", true);
-        properties.put("mail.smtp.port", "587");
-        properties.put("mail.smtp.host", "smtp.gmail.com");
+        properties.put("mail.smtp.auth", smtpCredential.getSmtpAuth());
+        properties.put("mail.smtp.starttls.enable", smtpCredential.getEnableStartTls());
+        properties.put("mail.smtp.port", smtpCredential.getSmtpPort());
+        properties.put("mail.smtp.host", smtpCredential.getSmtpHost());
 
         return Session.getInstance(properties, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication
-                        ("khalid.hasan.bjit", "zlpr ncix ceil ntlv");
+                        (smtpCredential.getUserMail(), smtpCredential.getUserPassword());
             }
         });
     }
@@ -114,7 +121,7 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
                 mailContent.getBcc(), mailContent.getSubject());
         Multipart multipart = new MimeMultipart();
         addTextPart(multipart, mailContent.getBody());
-        if (!mailContent.getAttachments().isEmpty()) {
+        if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
             try {
                 addAttachmentParts(multipart, mailContent.getAttachments());
             } catch (EmailException e) {
@@ -126,7 +133,7 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
         return message;
     }
 
-    private void setEmailHeader(MimeMessage message, List<String> to,List<String> cc, List<String> bcc, String subject) {
+    private void setEmailHeader(MimeMessage message, List<String> to, List<String> cc, List<String> bcc, String subject) {
         try {
             message.setRecipients(Message.RecipientType.TO,
                     createInternetAddresses(to));
@@ -191,6 +198,10 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
     private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent) throws MessagingException {
         MimeMessage message = new MimeMessage(session);
         setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
+        File htmlTemplate = mailContent.getHtmlTemplate();
+        if (!ObjectUtils.isEmpty(htmlTemplate)) {
+            validateHtmlTemplate(htmlTemplate);
+        }
 
         // Load HTML content from template and process with dynamic values
         String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate(), mailContent.getObjectMap());
@@ -206,11 +217,7 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
 
         // Add other parts (attachments, text, etc.) to the multipart
         if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
-            try {
-                addAttachmentParts(multipart, mailContent.getAttachments());
-            } catch (EmailException e) {
-                throw new RuntimeException(e);
-            }
+            addAttachmentParts(multipart, mailContent.getAttachments());
         }
         // Set the multipart as the content of the MimeMessage
         message.setContent(multipart);

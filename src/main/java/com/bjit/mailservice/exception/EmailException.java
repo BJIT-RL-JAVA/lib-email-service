@@ -1,7 +1,8 @@
 /**
- * Created by Mohammad Khalid Hasan|| BJIT-R&D
- * Since: 1/25/2024
- * Version: 1.0
+ * @author Khalid
+ * Date: 1/25/2024
+ * Time: 4:06 PM
+ * Project Name: lib-email-service
  */
 
 package com.bjit.mailservice.exception;

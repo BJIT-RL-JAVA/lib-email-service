@@ -44,7 +44,7 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
     }
 
     /**
-     * Sends an email with the specified mail content.
+     * Sends an email using SendGrid with the specified mail content.
      *
      * @param mailContent The content of the email to be sent.
      * @return A message indicating the result of the email sending operation.
@@ -85,8 +85,8 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
         for (String toEmail : mailContent.getTo()) {
             personalization.addTo(new Email(toEmail));
         }
-        if (!validateHtmlTemplate(mailContent.getHtmlTemplate())) {
-            throw new IllegalArgumentException(MessageConstant.html_file_type_mismatched);
+        if (!ObjectUtils.isEmpty(mailContent.getHtmlTemplate())) {
+            validateHtmlTemplate(mailContent.getHtmlTemplate());
         }
         String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate(), mailContent.getObjectMap());
 
@@ -120,7 +120,7 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
             Response response = sendGrid.api(request);
-            LOGGER.info(MessageConstant.sandgrid_api_call, response.getStatusCode(), response.getBody());
+            LOGGER.info("Calling sendgrid api {} {}", response.getStatusCode(), response.getBody());
         } catch (IOException ex) {
             LOGGER.error(MessageConstant.io_exception, ex);
             return MessageConstant.sendMail_error;

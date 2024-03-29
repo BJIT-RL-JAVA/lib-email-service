@@ -6,6 +6,7 @@ import com.bjit.mailservice.services.impl.SmtpMailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -28,7 +29,7 @@ public interface LoadMailTemplate {
     default String loadHtmlTemplate(File htmlTemplateFile, Map<String, Object> objectMap) {
         try {
             byte[] templateBytes;
-            if (htmlTemplateFile != null && htmlTemplateFile.exists() && !objectMap.isEmpty()) {
+            if (htmlTemplateFile != null && htmlTemplateFile.exists() && !ObjectUtils.isEmpty(objectMap)) {
                 // Process HTML template with dynamic content
                 return processHtmlTemplate(htmlTemplateFile, objectMap);
             } else if (htmlTemplateFile != null && htmlTemplateFile.exists()) {
@@ -52,10 +53,9 @@ public interface LoadMailTemplate {
         try {
             TemplateEngine templateEngine = new TemplateEngine();
             String template = Files.readString(htmlTemplateFile.toPath(), StandardCharsets.UTF_8);
-            // Create Thymeleaf context and add objectMap as a variable
             Context context = new Context();
             context.setVariables(objectMap);
-            // Process the Thymeleaf template with dynamic values
+
             return templateEngine.process(template, context);
         } catch (IOException e) {
             log.error("Error loading HTML template file", e);
