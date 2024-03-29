@@ -1,18 +1,10 @@
-/**
- * SmtpMailService is an implementation of the MailService interface that sends emails using the SMTP protocol.
- * It provides methods for sending emails with text content and attachments.
- *
- * @author Khalid|| BJIT-R&D
- * @since: 1/26/2024
- * Time: 3:38 PM
- * Project Name: lib-email-service
- * @version 1.0
- */
-
 package com.bjit.mailservice.services.impl;
 
+import com.bjit.mailservice.constants.MessageConstant;
 import com.bjit.mailservice.exception.EmailException;
 import com.bjit.mailservice.models.MailContent;
+import com.bjit.mailservice.models.SmtpCredential;
+import com.bjit.mailservice.services.LoadMailTemplate;
 import com.bjit.mailservice.services.MailService;
 import com.bjit.mailservice.validators.MailValidation;
 import jakarta.activation.DataHandler;
@@ -21,18 +13,31 @@ import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.util.StreamUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
 
-public class SmtpMailService implements MailService, MailValidation {
+/**
+ * SmtpMailService is an implementation of the MailService interface that sends emails using the SMTP protocol.
+ * It provides methods for sending emails with text content and attachments.
+ *
+ * @author Khalid
+ * @version 1.0
+ * Time: 3:38 PM
+ * Project Name: lib-email-service
+ */
+public class SmtpMailService implements MailService, MailValidation, LoadMailTemplate {
 
     private static final Logger log = LoggerFactory.getLogger(SmtpMailService.class);
+
+    private SmtpCredential smtpCredential;
+
+    public SmtpMailService(SmtpCredential smtpCredential) {
+        this.smtpCredential = smtpCredential;
+    }
 
     /**
      * Sends an email with the specified mail content.
@@ -45,19 +50,18 @@ public class SmtpMailService implements MailService, MailValidation {
     @Override
     public String sendMail(MailContent mailContent) throws MessagingException {
         try {
-
             Session session = createSmtpSession();
             MimeMessage message = createMimeMessage(session, mailContent);
             Transport.send(message);
-            return "Mail has been sent successfully.";
+            return MessageConstant.sendMail_success;
         } catch (MessagingException | EmailException e) {
-            log.error("Error sending email", e);
+            log.error(MessageConstant.sendMail_error, e);
             throw e;
         }
     }
 
     /**
-     * Sends an HTML templated email with the specified mail content.
+     * Sends an HTML templated email using SMTP with the specified mail content.
      *
      * @param mailContent The content of the email to be sent.
      * @return A message indicating the result of the email sending operation.
@@ -70,25 +74,34 @@ public class SmtpMailService implements MailService, MailValidation {
             Session session = createSmtpSession();
             MimeMessage message = createTemplateMimeMessage(session, mailContent);
             Transport.send(message);
-            return "HTML template mail has been sent successfully.";
+            return MessageConstant.successfully_sending_html_template_email;
         } catch (MessagingException e) {
-            log.error("Error sending HTML template email", e);
+            log.error(MessageConstant.error_sending_html_template_email, e);
             throw e;
         }
     }
 
+    /**
+     * Creates an SMTP session with authentication and TLS enabled.
+     * <p>
+     * Configures the server host, port, and  enables authentication,
+     * TLS for secure email transmission as well as new Authenticator
+     * instance to handle the SMTP authentication process
+     *
+     * @return A new Session object configured with SMTP settings.
+     */
     private Session createSmtpSession() {
         Properties properties = new Properties();
-        properties.put("mail.smtp.auth", true);
-        properties.put("mail.smtp.starttls.enable", true);
-        properties.put("mail.smtp.port", "587");
-        properties.put("mail.smtp.host", "smtp.gmail.com");
+        properties.put("mail.smtp.auth", smtpCredential.getSmtpAuth());
+        properties.put("mail.smtp.starttls.enable", smtpCredential.getEnableStartTls());
+        properties.put("mail.smtp.port", smtpCredential.getSmtpPort());
+        properties.put("mail.smtp.host", smtpCredential.getSmtpHost());
 
         return Session.getInstance(properties, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication
-                        ("khalid.hasan.bjit", "zlpr ncix ceil ntlv");
+                        (smtpCredential.getUserMail(), smtpCredential.getUserPassword());
             }
         });
     }
@@ -104,20 +117,23 @@ public class SmtpMailService implements MailService, MailValidation {
     private MimeMessage createMimeMessage(Session session, MailContent mailContent)
             throws MessagingException {
         MimeMessage message = new MimeMessage(session);
-        setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
+        setEmailHeader(message, mailContent.getTo(), mailContent.getCc(),
+                mailContent.getBcc(), mailContent.getSubject());
         Multipart multipart = new MimeMultipart();
         addTextPart(multipart, mailContent.getBody());
-        try {
-            addAttachmentParts(multipart, mailContent.getAttachments());
-        } catch (EmailException e) {
-            throw e;
+        if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
+            try {
+                addAttachmentParts(multipart, mailContent.getAttachments());
+            } catch (EmailException e) {
+                log.error(MessageConstant.process_attachment_error);
+                throw e;
+            }
         }
         message.setContent(multipart);
         return message;
     }
 
-    private MimeMessage setEmailHeader(MimeMessage message, List<String> to,
-                                       List<String> cc, List<String> bcc, String subject) {
+    private void setEmailHeader(MimeMessage message, List<String> to, List<String> cc, List<String> bcc, String subject) {
         try {
             message.setRecipients(Message.RecipientType.TO,
                     createInternetAddresses(to));
@@ -130,14 +146,12 @@ public class SmtpMailService implements MailService, MailValidation {
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
-        return message;
     }
 
     private Address[] createInternetAddresses(List<String> addresses) throws AddressException {
         if (addresses == null) {
             return new Address[0]; // Return an empty array if the addresses list is null
         }
-
         Address[] internetAddresses = new Address[addresses.size()];
         for (int i = 0; i < addresses.size(); i++) {
             internetAddresses[i] = new InternetAddress(addresses.get(i));
@@ -176,37 +190,37 @@ public class SmtpMailService implements MailService, MailValidation {
                 multipart.addBodyPart(filePart);
             }
         } catch (MessagingException | IOException e) {
-            log.error("Error sending email content", e);
+            log.error(MessageConstant.process_attachment_error, e);
             throw new EmailException(e.getMessage());
         }
     }
 
-    private String loadHtmlTemplate(String templateName) {
-        try {
-            ClassPathResource resource = new ClassPathResource("templates/" + templateName);
-            byte[] templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
-            return new String(templateBytes, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            log.error("Error loading HTML template file: {}", templateName, e);
-            throw new RuntimeException("Error loading HTML template file", e);
-        }
-    }
-
-    private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent)
-            throws MessagingException {
+    private MimeMessage createTemplateMimeMessage(Session session, MailContent mailContent) throws MessagingException {
         MimeMessage message = new MimeMessage(session);
         setEmailHeader(message, mailContent.getTo(), mailContent.getCc(), mailContent.getBcc(), mailContent.getSubject());
-        String htmlContent;
-
-        if (mailContent.getHtmlTemplate() != null && !mailContent.getHtmlTemplate().isEmpty()) {
-            htmlContent = mailContent.getHtmlTemplate();
-        } else {
-            htmlContent = loadHtmlTemplate("welcome.html");
+        File htmlTemplate = mailContent.getHtmlTemplate();
+        if (!ObjectUtils.isEmpty(htmlTemplate)) {
+            validateHtmlTemplate(htmlTemplate);
         }
 
-        htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
+        // Load HTML content from template and process with dynamic values
+        String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate(), mailContent.getObjectMap());
 
-        message.setContent(htmlContent, "text/html");
+        // Create a multipart to hold both HTML content and other parts (if any)
+        MimeMultipart multipart = new MimeMultipart();
+
+        // Create a MimeBodyPart for the HTML content
+        MimeBodyPart htmlPart = new MimeBodyPart();
+        htmlPart.setContent(htmlContent, "text/html");
+        addTextPart(multipart, mailContent.getBody());
+        multipart.addBodyPart(htmlPart);
+
+        // Add other parts (attachments, text, etc.) to the multipart
+        if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
+            addAttachmentParts(multipart, mailContent.getAttachments());
+        }
+        // Set the multipart as the content of the MimeMessage
+        message.setContent(multipart);
         return message;
     }
 }

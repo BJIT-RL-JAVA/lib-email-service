@@ -1,10 +1,11 @@
 package com.bjit.mailservice.services.impl;
 
+import com.bjit.mailservice.constants.MessageConstant;
+import com.bjit.mailservice.services.LoadMailTemplate;
 import com.bjit.mailservice.services.MailService;
 import com.bjit.mailservice.validators.MailValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import com.bjit.mailservice.models.MailContent;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
@@ -17,11 +18,9 @@ import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
 import jakarta.mail.MessagingException;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StreamUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Base64;
 
@@ -31,9 +30,8 @@ import java.util.Base64;
  *
  * @author Mallika Dey
  */
-public class SendGridMailService implements MailService, MailValidation {
+public class SendGridMailService implements MailService, MailValidation, LoadMailTemplate {
     private static final Logger LOGGER = LoggerFactory.getLogger(SendGridMailService.class);
-
     private SendGrid sendGrid;
 
     /**
@@ -46,7 +44,7 @@ public class SendGridMailService implements MailService, MailValidation {
     }
 
     /**
-     * Sends an email with the specified mail content.
+     * Sends an email using SendGrid with the specified mail content.
      *
      * @param mailContent The content of the email to be sent.
      * @return A message indicating the result of the email sending operation.
@@ -61,7 +59,6 @@ public class SendGridMailService implements MailService, MailValidation {
         for (String toEmail : mailContent.getTo()) {
             personalization.addTo(new Email(toEmail));
         }
-
         mail.addPersonalization(personalization);
         mail.setSubject(mailContent.getSubject());
         mail.addContent(new Content("text/plain", mailContent.getBody()));
@@ -88,11 +85,11 @@ public class SendGridMailService implements MailService, MailValidation {
         for (String toEmail : mailContent.getTo()) {
             personalization.addTo(new Email(toEmail));
         }
+        if (!ObjectUtils.isEmpty(mailContent.getHtmlTemplate())) {
+            validateHtmlTemplate(mailContent.getHtmlTemplate());
+        }
+        String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate(), mailContent.getObjectMap());
 
-        String htmlContent = (mailContent.getHtmlTemplate() == null) ?
-                loadHtmlTemplate("welcome.html") : mailContent.getHtmlTemplate();
-
-        htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
         mail.addPersonalization(personalization);
         mail.setSubject(mailContent.getSubject());
         mail.addContent(new Content("text/plain", mailContent.getBody()));
@@ -104,7 +101,6 @@ public class SendGridMailService implements MailService, MailValidation {
     private String mailSendUsingSendGrid(MailContent mailContent, Mail mail) {
         if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
             for (File attachment : mailContent.getAttachments()) {
-
                 try {
                     checkFileCompatibility(attachment);
                     byte[] fileContent = Files.readAllBytes(attachment.toPath());
@@ -113,12 +109,11 @@ public class SendGridMailService implements MailService, MailValidation {
                     sendGridAttachment.setFilename(attachment.getName());
                     mail.addAttachments(sendGridAttachment);
                 } catch (IOException ex) {
-                    LOGGER.error("IO exception occured ", ex);
-                    return "mail sending failed";
+                    LOGGER.error(MessageConstant.io_exception, ex);
+                    return MessageConstant.sendMail_error;
                 }
             }
         }
-
         Request request = new Request();
         try {
             request.setMethod(Method.POST);
@@ -127,20 +122,9 @@ public class SendGridMailService implements MailService, MailValidation {
             Response response = sendGrid.api(request);
             LOGGER.info("Calling sendgrid api {} {}", response.getStatusCode(), response.getBody());
         } catch (IOException ex) {
-            LOGGER.error("IO exception occur in request ", ex);
-            return "mail sending failed";
+            LOGGER.error(MessageConstant.io_exception, ex);
+            return MessageConstant.sendMail_error;
         }
-        return "mail sent successfully";
-    }
-
-    private String loadHtmlTemplate(String templateName) {
-        try {
-            ClassPathResource resource = new ClassPathResource("templates/" + templateName);
-            byte[] templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
-            return new String(templateBytes, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            LOGGER.error("Error loading HTML template file: {}", templateName, e);
-            throw new RuntimeException("Error loading HTML template file", e);
-        }
+        return MessageConstant.sendMail_success;
     }
 }

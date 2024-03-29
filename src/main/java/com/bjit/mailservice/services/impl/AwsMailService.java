@@ -1,41 +1,43 @@
 package com.bjit.mailservice.services.impl;
 
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
+import com.amazonaws.services.simpleemail.model.RawMessage;
+import com.amazonaws.services.simpleemail.model.SendRawEmailRequest;
+import com.bjit.mailservice.constants.MessageConstant;
 import com.bjit.mailservice.models.MailContent;
+import com.bjit.mailservice.services.LoadMailTemplate;
 import com.bjit.mailservice.services.MailService;
 import com.bjit.mailservice.validators.MailValidation;
+
+import jakarta.activation.DataHandler;
+import jakarta.activation.FileDataSource;
+import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
+import jakarta.mail.Multipart;
+import jakarta.mail.Session;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.ObjectUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Properties;
 
-import com.amazonaws.services.simpleemail.model.RawMessage;
-import com.amazonaws.services.simpleemail.model.SendRawEmailRequest;
-import jakarta.activation.DataHandler;
-import jakarta.activation.FileDataSource;
-import jakarta.mail.Message;
-import jakarta.mail.Multipart;
-import jakarta.mail.Session;
-import jakarta.mail.internet.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StreamUtils;
-
 /**
- * Implementation of the MailService interface for sending emails using AWS SES (Simple Email Service).
+ * Implementation of the MailService interface for sending emails using AWS SES.
  * This class handles the integration with AWS SES and provides the logic for sending email messages.
  *
  * @author Mallika Dey
  */
-public class AwsMailService implements MailService, MailValidation {
+public class AwsMailService implements MailService, MailValidation, LoadMailTemplate {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsMailService.class);
     private final AmazonSimpleEmailService client;
 
@@ -76,7 +78,7 @@ public class AwsMailService implements MailService, MailValidation {
     }
 
     /**
-     * Sends an HTML template-based email using the Amazon Simple Email Service with the provided MailContent.
+     * Sends an HTML template-based email using the AWS SES with the provided MailContent.
      * If a specific HTML template is not provided in the MailContent, the default "welcome.html" template is loaded.
      * The dynamic content specified in the MailContent is replaced in the template before sending the email.
      *
@@ -90,11 +92,14 @@ public class AwsMailService implements MailService, MailValidation {
         Session session = Session.getDefaultInstance(new Properties());
 
         MimeMessage message = generateMimeMessage(mailContent, session);
-        String htmlContent = (mailContent.getHtmlTemplate() == null) ?
-                loadHtmlTemplate("welcome.html") : mailContent.getHtmlTemplate();
+        File htmlTemplate = mailContent.getHtmlTemplate();
+        if (!ObjectUtils.isEmpty(htmlTemplate)) {
+            validateHtmlTemplate(htmlTemplate);
+        }
 
-        htmlContent = htmlContent.replace("[Dynamic Content]", mailContent.getBody());
-        return mailSend(htmlContent, mailContent, message);
+        String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate(), mailContent.getObjectMap());
+        mailSend(htmlContent, mailContent, message);
+        return MessageConstant.sendMail_success;
     }
 
     private MimeMessage generateMimeMessage(MailContent mailContent,
@@ -102,9 +107,6 @@ public class AwsMailService implements MailService, MailValidation {
         MimeMessage message = new MimeMessage(session);
 
         message.setSubject(mailContent.getSubject(), "UTF-8");
-
-        ArrayList<InternetAddress> addressCc = new ArrayList<InternetAddress>();
-        ArrayList<InternetAddress> addressBCc = new ArrayList<InternetAddress>();
 
         if (!ObjectUtils.isEmpty(mailContent.getTo())) {
             setRecipients(message, Message.RecipientType.TO, mailContent.getTo());
@@ -115,15 +117,12 @@ public class AwsMailService implements MailService, MailValidation {
         if (!ObjectUtils.isEmpty(mailContent.getBcc())) {
             setRecipients(message, Message.RecipientType.BCC, mailContent.getBcc());
         }
-
         message.setFrom(new InternetAddress(mailContent.getFrom()));
-
         return message;
     }
 
     private void setRecipients(MimeMessage message, Message.RecipientType type,
                                ArrayList<String> addresses) throws MessagingException {
-
         ArrayList<InternetAddress> addressTo = new ArrayList<InternetAddress>();
         for (String address : addresses) {
             addressTo.add(new InternetAddress(address));
@@ -134,6 +133,7 @@ public class AwsMailService implements MailService, MailValidation {
     private String mailSend(String htmlContent, MailContent mailContent
             , MimeMessage message) throws MessagingException {
         try {
+            LOGGER.info("Attempting to send an template email through Amazon SES");
             MimeBodyPart htmlPart = new MimeBodyPart();
 
             htmlPart.setContent(htmlContent, "text/html; charset=UTF-8");
@@ -150,11 +150,8 @@ public class AwsMailService implements MailService, MailValidation {
                     multipart.addBodyPart(filePart);
                 }
             }
-
             message.setContent(multipart);
 
-            System.out.println("Attempting to send an template email through Amazon SES "
-                    + "using the AWS SDK for Java...");
             PrintStream out = System.out;
             message.writeTo(out);
 
@@ -164,20 +161,9 @@ public class AwsMailService implements MailService, MailValidation {
             client.sendRawEmail(new SendRawEmailRequest(
                     new RawMessage(ByteBuffer.wrap(outputStream.toByteArray()))));
         } catch (IOException ex) {
-            LOGGER.error("Error sending email content", ex);
-            return "mail sending failed";
+            LOGGER.error(MessageConstant.process_attachment_error, ex);
+            return MessageConstant.sendMail_error;
         }
-        return "mail sent successfully";
-    }
-
-    private String loadHtmlTemplate(String templateName) {
-        try {
-            ClassPathResource resource = new ClassPathResource("templates/" + templateName);
-            byte[] templateBytes = StreamUtils.copyToByteArray(resource.getInputStream());
-            return new String(templateBytes, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            LOGGER.error("Error loading HTML template file: {}", templateName, e);
-            throw new RuntimeException("Error loading HTML template file", e);
-        }
+        return MessageConstant.sendMail_success;
     }
 }

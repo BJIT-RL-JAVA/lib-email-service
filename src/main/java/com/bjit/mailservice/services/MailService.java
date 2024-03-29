@@ -13,9 +13,24 @@ import jakarta.mail.MessagingException;
  * @author Mallika Dey
  */
 public interface MailService {
-
+    /**
+     * Sends a simple text email
+     *
+     * @param mailContent The MailContent object containing information about the email to be sent,
+     *                    including the HTML template and dynamic content.
+     * @return String for mail sending confirmation
+     * @throws MessagingException If an error occurs during the email sending process.
+     */
     String sendMail(MailContent mailContent) throws MessagingException;
 
+    /**
+     * Sends an HTML template-based email
+     *
+     * @param mailContent The MailContent object containing information about the email to be sent,
+     *                    including the HTML template and dynamic content.
+     * @return A unique message identifier for tracking the sent email.
+     * @throws MessagingException If an error occurs during the email sending process.
+     */
     String sendHtmlTemplateMail(MailContent mailContent) throws MessagingException;
 }
 

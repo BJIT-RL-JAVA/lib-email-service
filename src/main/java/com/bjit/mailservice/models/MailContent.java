@@ -1,5 +1,6 @@
 package com.bjit.mailservice.models;
 
+import com.bjit.mailservice.constants.MessageConstant;
 import com.bjit.mailservice.validators.ValidAttachmentSize;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Represents the content of an email message.
@@ -22,16 +24,17 @@ import java.util.ArrayList;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MailContent {
-    @Email
+    @Email(message = MessageConstant.from_email_address_invalid)
     private String from;
 
-    @NotEmpty(message = "Receiver is required")
+    @NotEmpty(message = MessageConstant.to_email_address_empty)
     private ArrayList<@NotNull String> to;
     private ArrayList<@NotNull String> cc;
     private ArrayList<@NotNull String> bcc;
     private String subject;
     private String body;
-    private String htmlTemplate;
+    private File htmlTemplate;
+    private HashMap<String, Object> objectMap;
 
     @ValidAttachmentSize(groups = {Default.class})
     private ArrayList<File> attachments;

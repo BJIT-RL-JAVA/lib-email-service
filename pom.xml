@@ -12,7 +12,8 @@
     <artifactId>mailservice</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>lib-email-service</name>
-    <description>Demo project for Spring Boot</description>
+    <description>Spring Boot project providing a comprehensive email service solution.</description>
+    <packaging>jar</packaging>
     <properties>
         <java.version>17</java.version>
     </properties>
@@ -24,6 +25,13 @@
             <url>https://maven.pkg.github.com/BJIT-RL-JAVA/lib-email-service</url>
         </repository>
     </distributionManagement>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>apache</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencies>
         <dependency>
@@ -89,6 +97,12 @@
             <artifactId>spring-cloud-aws-ses</artifactId>
             <version>2.4.4</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.thymeleaf/thymeleaf -->
+        <dependency>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf</artifactId>
+            <version>3.1.2.RELEASE</version>
+        </dependency>
 
     </dependencies>
 
@@ -99,11 +113,30 @@
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>3.1.1</version> <!-- Check and update the version if needed -->
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--                    <configuration>-->
+            <!--                    <excludePackageNames>com.bjit.mailservice.config:com.bjit.mailservice.validators-->
+            <!--                    </excludePackageNames>-->
+            <!--                    <excludePackageNames>com.bjit.mailservice.validators</excludePackageNames>-->
+            <!--                    </configuration>-->
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-
+                    <classifier>exec</classifier>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
@@ -111,6 +144,28 @@
                         </exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version> <!-- Use the latest version -->
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

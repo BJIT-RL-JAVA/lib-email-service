@@ -1,6 +1,9 @@
 package com.bjit.mailservice.config;
 
+import com.bjit.mailservice.exception.EmailException;
+import com.bjit.mailservice.constants.MessageConstant;
 import com.bjit.mailservice.models.MailServiceType;
+import com.bjit.mailservice.models.SmtpCredential;
 import com.bjit.mailservice.services.MailSender;
 import com.bjit.mailservice.services.MailServiceFactory;
 import com.bjit.mailservice.services.impl.AWSFactory;
@@ -11,7 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author Mallika Dey
+ * @hidden
  */
 @Configuration
 public class MailConfig {
@@ -27,12 +30,30 @@ public class MailConfig {
     @Value("${sendgrid.api.key:}")
     private String sendGridApiKey;
 
+    @Value("${smtp.mail.username:}")
+    private String userMail;
+
+    @Value("${smtp.mail.password:}")
+    private String userPassword;
+
+    @Value("${smtp.mail.host:}")
+    private String smtpHost;
+
+    @Value("${smtp.mail.port:}")
+    private String smtpPort;
+
+    @Value("${smtp.mail.properties.mail.smtp.auth:false}")
+    private Boolean smtpAuth;
+
+    @Value("${smtp.mail.properties.mail.smtp.starttls.enable:false}")
+    private Boolean enableStartTls;
+
     /**
      * Bean definition for creating a MailServiceFactory based on the configured mail service type.
      *
      * @param mailServiceType The type of mail service to use (e.g., "sendgrid" or "aws")
      * @return MailServiceFactory instance for the specified mail service type
-     * @throws IllegalArgumentException if an invalid mail service type is provided
+     * @throws EmailException if an invalid mail service type is provided
      */
     @Bean
     public MailServiceFactory mailServiceFactory(@Value("${mail.service.type}") String mailServiceType) {
@@ -40,10 +61,20 @@ public class MailConfig {
             return new SendGridFactory(sendGridApiKey);
         else if (MailServiceType.AWS.getValue().equals(mailServiceType.toUpperCase()))
             return new AWSFactory(accessKey, secretKey, region);
-        else if (MailServiceType.SMTP.getValue().equals(mailServiceType.toUpperCase()))
-            return new SmtpFactory();
+        else if (MailServiceType.SMTP.getValue().equals(mailServiceType.toUpperCase())) {
+            SmtpCredential smtpCredential = SmtpCredential
+                    .builder()
+                    .enableStartTls(enableStartTls)
+                    .smtpAuth(smtpAuth)
+                    .smtpPort(smtpPort)
+                    .smtpHost(smtpHost)
+                    .userMail(userMail)
+                    .userPassword(userPassword)
+                    .build();
+            return new SmtpFactory(smtpCredential);
+        }
 
-        throw new IllegalArgumentException("Invalid mail service type: " + mailServiceType);
+        throw new EmailException(MessageConstant.invalid_email_service + mailServiceType);
     }
 
     /**
