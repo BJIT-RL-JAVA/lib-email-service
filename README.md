@@ -17,8 +17,11 @@ MailService is a Java-based library that provides functionality for sending emai
 To use MailService in your project, you can include it as a jar.
 
 ### Installation
+To obtain the `mailservice-0.0.1-SNAPSHOT-jar-with-dependencies.jar` file for integration into your project, please follow these formal steps:
 
-Add the `mailservice-0.0.1-SNAPSHOT-jar-with-dependencies.jar` in your project.
+1. Navigate to the **com.bjit.mailservice** under packages section.
+2. Download the **mailservice-0.0.1-SNAPSHOT-jar-with-dependencies.jar** file 
+3. Once the download is complete, add the downloaded JAR file to your project's dependencies.
 
 [//]: # (Add the following dependency to your `pom.xml`:)
 
