@@ -113,7 +113,19 @@
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>3.1.1</version> <!-- Check and update the version if needed -->
             </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -125,12 +137,12 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludePackageNames>com.bjit.mailservice.config:com.bjit.mailservice.validators
+                    </excludePackageNames>
+                    <excludePackageNames>com.bjit.mailservice.validators</excludePackageNames>
+                </configuration>
             </plugin>
-            <!--                    <configuration>-->
-            <!--                    <excludePackageNames>com.bjit.mailservice.config:com.bjit.mailservice.validators-->
-            <!--                    </excludePackageNames>-->
-            <!--                    <excludePackageNames>com.bjit.mailservice.validators</excludePackageNames>-->
-            <!--                    </configuration>-->
 
             <plugin>
                 <groupId>org.springframework.boot</groupId>

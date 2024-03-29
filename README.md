@@ -19,8 +19,8 @@ To use MailService in your project, you can include it as a jar.
 ### Installation
 To obtain the `mailservice-0.0.1-SNAPSHOT-jar-with-dependencies.jar` file for integration into your project, please follow these formal steps:
 
-1. Navigate to the **com.bjit.mailservice** under packages section.
-2. Download the **mailservice-0.0.1-SNAPSHOT-jar-with-dependencies.jar** file 
+1. Navigate to the **[com.bjit.mailservice](https://github.com/BJIT-RL-JAVA/lib-email-service/packages/2084202)** under packages section.
+2. Download the **[mailservice-0.0.1-SNAPSHOT-jar-with-dependencies.jar](https://github-registry-files.githubusercontent.com/746993638/e3c48b00-d7c2-11ee-839a-e6ffa8fd55c8?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240329%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240329T053149Z&X-Amz-Expires=300&X-Amz-Signature=63dc7bf529b260edd8ddb2cf2c2110d4bd0bb9e7c593db1a44fc9bf2ed64095f&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=746993638&response-content-disposition=filename%3Dmailservice-0.0.1-20240301.055718-1.jar&response-content-type=application%2Foctet-stream)** file 
 3. Once the download is complete, add the downloaded JAR file to your project's dependencies.
 
 [//]: # (Add the following dependency to your `pom.xml`:)
