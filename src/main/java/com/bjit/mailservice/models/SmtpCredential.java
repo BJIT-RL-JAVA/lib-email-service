@@ -2,6 +2,11 @@ package com.bjit.mailservice.models;
 
 import lombok.*;
 
+/**
+ * Represents SMTP credentials required for sending emails.
+ *
+ * @author Mallika Dey
+ */
 @Builder
 @Getter
 @NoArgsConstructor
