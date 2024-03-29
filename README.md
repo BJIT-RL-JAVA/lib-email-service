@@ -38,7 +38,7 @@ Add the `mailservice-0.0.1-SNAPSHOT-jar-with-dependencies.jar` in your project.
 [//]: # (```)
 
 ### Configuration
-Before using MailService, you need to configure it with the appropriate settings for your chosen email service provider. Below are the configuration options for AWS SES, SendGrid:
+Before using MailService, you need to configure it with the appropriate settings for your chosen email service provider. Below are the configuration options for AWS SES, SendGrid & SMTP:
 
 #### AWS configuration
 
@@ -63,6 +63,23 @@ sendgrid:
     key: <your-sendgrid-api-key>
 ```
 
+#### SMTP configuration
+
+```yml
+smtp:
+  mail:
+    username: <your-smtpserver-username>
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+          auth: true
+    host: smtp.gmail.com
+    port: 587
+    password: <your-smtpserver-password>
+```
+
 #### MailService Type
 
 ```yml
@@ -72,32 +89,42 @@ mail:
 ```
 
 ### Usage
-To send an email using MailService, follow these steps:
-
-- Add _com.bjit_ to the component scan. Here is an example,
-```java
-@ComponentScan(basePackages = {"org.example", "com.bjit"})
-public class Application {
+1. To send an simple mail using MailService, follow these steps:
+   - Add _com.bjit_ to the component scan. Here is an example,
+    ```java
+    @ComponentScan(basePackages = {"org.example", "com.bjit"})
+    public class Application {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
 
-}
-```
+    }
+    ```
 
-- Create a MailContent object with the email details, including the recipient(s), sender, subject, and body.
+   - Create a MailContent object with the email details, including the recipient(s), sender, subject, and body.
 
-```java
-MailContent mailContent = new MailContent();
-mailContent.setTo(new ArrayList<>(Arrays.asList("receiver_mail")));
-mailContent.setFrom("sender_mail");
-mailContent.setSubject("mail_subject");
-mailContent.setBody("mail_body");
-```
-- Use the MailSender to send the email by calling the **sendMail** or **sendMailWithHTMLTemplate** method with the MailContent object.
+    ```java
+    MailContent mailContent = new MailContent();
+    mailContent.setTo(new ArrayList<>(Arrays.asList("receiver_mail")));
+    mailContent.setFrom("sender_mail");
+    mailContent.setSubject("mail_subject");
+    mailContent.setBody("mail_body");
+    ```
+   - Use the MailSender to send the email by calling the **sendMail** or **sendMailWithHTMLTemplate** method with the MailContent object.
 
-```java
-mailSender.sendMail(mailContent);
-```
+    ```java
+    mailSender.sendMail(mailContent);
+    ```
+2. You may also use custom HTML template. You can provide your custom HTML template like this -
+    ```java
+    mailContent.setHtmlTemplate(new File(html-file-location));
+    ```
+    If you have dynamic field in your HTML template, you may pass these fields through map.
+    ```java
+    HashMap<String, Object> objectHashMap = new HashMap<>();
+    objectHashMap.put("fieldName", value);
+    mailContent.setObjectMap(objectHashMap);
+    ```
+
 
