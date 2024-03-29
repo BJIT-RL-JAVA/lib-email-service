@@ -120,7 +120,7 @@ mail:
     ```java
     mailContent.setHtmlTemplate(new File(html-file-location));
     ```
-    If you have dynamic field in your HTML template, you may pass these fields through map.
+    If you have dynamic field in your HTML template, you may pass these fields through hashmap.
     ```java
     HashMap<String, Object> objectHashMap = new HashMap<>();
     objectHashMap.put("fieldName", value);
