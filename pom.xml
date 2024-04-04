@@ -8,21 +8,33 @@
         <version>3.2.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.bjit</groupId>
-    <artifactId>mailservice</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <groupId>com.bjitgroup</groupId>
+    <artifactId>emailservice</artifactId>
+    <version>0.0.1</version>
     <name>lib-email-service</name>
-    <description>Spring Boot project providing a comprehensive email service solution.</description>
+    <description>A versatile email library for sending templated and non-templated emails with optional attachments.</description>
     <packaging>jar</packaging>
     <properties>
         <java.version>17</java.version>
+
+        <junit.version>5.10.1</junit.version>
+
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
+        <central-publishing-maven-plugin.version>0.3.0</central-publishing-maven-plugin.version>
+        <nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
+        <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
+        <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
     </properties>
 
     <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
         <repository>
-            <id>github</id>
-            <name>GitHub BJIT Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/BJIT-RL-JAVA/lib-email-service</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
 
@@ -110,64 +122,129 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.1.1</version> <!-- Check and update the version if needed -->
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>${central-publishing-maven-plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <tokenAuth>true</tokenAuth>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${maven-source-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
+                </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
+                        <phase>package</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
-            <!--                    <configuration>-->
-            <!--                    <excludePackageNames>com.bjit.mailservice.config:com.bjit.mailservice.validators-->
-            <!--                    </excludePackageNames>-->
-            <!--                    <excludePackageNames>com.bjit.mailservice.validators</excludePackageNames>-->
-            <!--                    </configuration>-->
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>${maven-gpg-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                        <configuration>
+                            <keyname>keyname</keyname>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>${nexus-staging-maven-plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <classifier>exec</classifier>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version> <!-- Use the latest version -->
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                    </archive>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:git@github.com:BJIT-RL-JAVA/lib-email-service.git</connection>
+        <developerConnection>scm:git:ssh://github.com:BJIT-RL-JAVA/lib-email-service.git</developerConnection>
+        <url>https://github.com/BJIT-RL-JAVA/lib-email-service</url>
+    </scm>
+    <developers>
+        <developer>
+            <id>Mallika-BJIT</id>
+            <name>Mallika Dey</name>
+            <email>mallika.dey@bjitgroup.com</email>
+            <organization>Bangladesh Japan Information Technology-BJIT</organization>
+            <organizationUrl>https://bjitgroup.com/</organizationUrl>
+        </developer>
+
+        <developer>
+            <id>khalid-bjit</id>
+            <name>Mohammad Khalid Hasan</name>
+            <email>khalid.hasan@bjitgroup.com</email>
+            <organization>Bangladesh Japan Information Technology-BJIT</organization>
+            <organizationUrl>https://bjitgroup.com/</organizationUrl>
+        </developer>
+    </developers>
 
 </project>
