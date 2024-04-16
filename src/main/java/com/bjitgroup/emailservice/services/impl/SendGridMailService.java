@@ -60,8 +60,14 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
             personalization.addTo(new Email(toEmail));
         }
         mail.addPersonalization(personalization);
-        mail.setSubject(mailContent.getSubject());
-        mail.addContent(new Content("text/plain", mailContent.getBody()));
+
+        if (!ObjectUtils.isEmpty(mailContent.getSubject()))
+            mail.setSubject(mailContent.getSubject());
+        else mail.setSubject(" ");
+
+        if (!ObjectUtils.isEmpty(mailContent.getBody()))
+            mail.addContent(new Content("text/plain", mailContent.getBody()));
+        else mail.addContent(new Content("text/plain", " "));
 
         return mailSendUsingSendGrid(mailContent, mail);
     }
@@ -91,9 +97,17 @@ public class SendGridMailService implements MailService, MailValidation, LoadMai
         String htmlContent = loadHtmlTemplate(mailContent.getHtmlTemplate(), mailContent.getObjectMap());
 
         mail.addPersonalization(personalization);
-        mail.setSubject(mailContent.getSubject());
-        mail.addContent(new Content("text/plain", mailContent.getBody()));
-        mail.addContent(new Content("text/html", htmlContent));
+
+        if (!ObjectUtils.isEmpty(mailContent.getSubject()))
+            mail.setSubject(mailContent.getSubject());
+        else mail.setSubject(" ");
+
+        if (!ObjectUtils.isEmpty(mailContent.getBody()))
+            mail.addContent(new Content("text/plain", mailContent.getBody()));
+        else mail.addContent(new Content("text/plain", " "));
+
+        if (!ObjectUtils.isEmpty(htmlContent))
+            mail.addContent(new Content("text/html", htmlContent));
 
         return mailSendUsingSendGrid(mailContent, mail);
     }

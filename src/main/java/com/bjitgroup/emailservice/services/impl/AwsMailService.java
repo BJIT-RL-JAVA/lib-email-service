@@ -66,15 +66,7 @@ public class AwsMailService implements MailService, MailValidation, LoadMailTemp
 
         MimeMultipart msg_body = new MimeMultipart("alternative");
 
-        MimeBodyPart wrap = new MimeBodyPart();
-
-        MimeBodyPart textPart = new MimeBodyPart();
-        textPart.setContent(mailContent.getBody(), "text/plain; charset=UTF-8");
-        msg_body.addBodyPart(textPart);
-
-        MimeBodyPart htmlPart = new MimeBodyPart();
-
-        return mailSend(mailContent.getBody(), mailContent, message);
+        return mailSend(null, mailContent, message);
     }
 
     /**
@@ -135,11 +127,22 @@ public class AwsMailService implements MailService, MailValidation, LoadMailTemp
         try {
             LOGGER.info("Attempting to send an template email through Amazon SES");
             MimeBodyPart htmlPart = new MimeBodyPart();
+            MimeBodyPart textPart = new MimeBodyPart();
 
-            htmlPart.setContent(htmlContent, "text/html; charset=UTF-8");
+            if (!ObjectUtils.isEmpty(mailContent.getBody()))
+                textPart.setContent(mailContent.getBody(), "text/plain; charset=UTF-8");
+            else
+                textPart.setContent(" ", "text/plain; charset=UTF-8");
+
+            if (!ObjectUtils.isEmpty(htmlContent))
+                htmlPart.setContent(htmlContent, "text/html; charset=UTF-8");
+
+            else
+                htmlPart.setContent("", "text/html; charset=UTF-8");
 
             Multipart multipart = new MimeMultipart();
             multipart.addBodyPart(htmlPart);
+            multipart.addBodyPart(textPart);
 
             if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
                 for (File file : mailContent.getAttachments()) {

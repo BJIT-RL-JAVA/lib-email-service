@@ -120,7 +120,10 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
         setEmailHeader(message, mailContent.getTo(), mailContent.getCc(),
                 mailContent.getBcc(), mailContent.getSubject());
         Multipart multipart = new MimeMultipart();
-        addTextPart(multipart, mailContent.getBody());
+
+        if (!ObjectUtils.isEmpty(mailContent.getBody()))
+            addTextPart(multipart, mailContent.getBody());
+
         if (!ObjectUtils.isEmpty(mailContent.getAttachments())) {
             try {
                 addAttachmentParts(multipart, mailContent.getAttachments());
@@ -212,7 +215,10 @@ public class SmtpMailService implements MailService, MailValidation, LoadMailTem
         // Create a MimeBodyPart for the HTML content
         MimeBodyPart htmlPart = new MimeBodyPart();
         htmlPart.setContent(htmlContent, "text/html");
-        addTextPart(multipart, mailContent.getBody());
+
+        if (!ObjectUtils.isEmpty(mailContent.getBody()))
+            addTextPart(multipart, mailContent.getBody());
+
         multipart.addBodyPart(htmlPart);
 
         // Add other parts (attachments, text, etc.) to the multipart
