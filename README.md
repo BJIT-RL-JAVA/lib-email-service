@@ -119,5 +119,12 @@ mail:
     objectHashMap.put("fieldName", value);
     mailContent.setObjectMap(objectHashMap);
     ```
+## Contributors Details
 
+Contributors who have helped to improve this project:
+
+| Name          | Email           | Id           |
+| ------------- | --------------- | --------------- |
+| Mohammad Khalid Hasan |  khalid.hasan@bjitgroup.com|  11782   |
+| Mallika Dey |  mallika.dey@bjitgroup.com | 11776   |
 
